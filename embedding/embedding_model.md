@@ -24,9 +24,10 @@ word2vec属于自编码无监督学习，语料来自于文本，不需要用户
 ![image](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/embedding/resources/skipgram.png) 
 
 ### CBOW (continuous bag of words)
+
 用周围词预测中心词。一个长度为L+1滑动窗口对应1个训练样例。输入的one-hot表示所有周围词位置为1，输出的one-hot表示中心词对应位置为1。隐层会对所有周围词的词向量进行加和并且平均。
 
-![image](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/embedding/resources/cbow.png)
+![image](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/embedding/resources/skipgram.png)
 	
 目标函数(objective function)和梯度下降的公式推导见[word2vec公式推导](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/embedding/resources/w2v公式推导.png)
 
@@ -39,16 +40,17 @@ Tomas Mikolov为代表的google学者们继而提出第二篇论文：Distribute
 ### Hierachical Softmax (层次softmax)
 用哈夫曼树(二叉树)取代softmax层。哈夫曼树的叶子节点为$V$个词汇，在文本中频率越高的单词离根节点越近。而非叶子节点均用向量表示，是这个模型需要进行学习的参数。
 	
-![image](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/embedding/resources/hierachical_softmax.png)
+
   
 隐藏层的结果$h$直接输入哈夫曼树的根节点，并与根节点以及到目标词的路径上所有非叶子节点进行点乘并过一次sigmoid函数。因此softmax被$logV$个二分类器代替(前向计算复杂度从$V$减少为$logV$)。如果当前节点到目标叶子节点往左走(默认分类为1)，该节点的输出为二分类器的输出$\sigma$, 否则输出为$1-\sigma$。如果路径为左-右-右，经过的节点分别为$w_1$-$w_2$-$w_3$, 目标函数是最大化$\sigma(h*w_1)*(1-\sigma(h*w_2))*(1-\sigma(h*w_3))$, 转化为最小化负log loss并对$w_1$,$w_2$,$w_3$进行梯度下降。其余不在路径上的非叶子节点不需要参与更新，大大减少了计算量。反向传播复杂度也从$V$减少为$logV$。
   
 ### Negative Sampling (负采样)
+
 原生的softmax层考虑了所有词语，负采样只考虑一个正样本和几个负样本，并对每个样本进行一次二分类（逻辑回归），这样输出的神经元可以从百万到几十个，权重矩阵也大大减少。原来的训练样本只考虑了词语的共现关系，但负采样需要产生一些错误的词对，来构成**错误的共现关系**。
 
 通过负采样方法，word2vec的目标函数分别为：
 
-![image](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/embedding/resources/objfunc_negsampling.png)
+
   
 如何进行采样呢？如下图，每个单词被负采样的频率取决于它在语料中出现的频次。其中$3/4$是基于经验所得，相比于$y=x$,可以提高一些频次较低的单词被采样的概率，并降低频次较高的单词的采样概率。
 
