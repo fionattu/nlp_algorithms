@@ -5,7 +5,7 @@ Mark notes related to:
 * Word2Vec algorithms: Skip-gram and CBOW. 
 * Tricks that proposed to accelerate learning: Negative Sampling, Hierachical Softmax.
 
-注：以下图片来源于网络。
+注: the terms "word vectors" and "word embeddings" are often used interchangeably.
 
 ## Word2Vec Algorithms
 
@@ -19,13 +19,13 @@ word2vec属于自编码无监督学习，语料完全来自于文本，不需要
 其实隐层到输出层也有一个词向量矩阵W'，但一般大家用的是W。或许可以通过拼接或者平均的方法组成词向量，哪个效果好用哪个。
 
 ### Skip-gram
-用中心词预测周围词。一个长度为L+1滑动窗口对应L个训练样例。输入的one-hot encoding中心词位置为1，输出的one-hot encoding周围词对应位置为1。
+用中心词预测周围词。一个长度为L的滑动窗口对应2L个训练样例。输入的one-hot encoding中心词位置为1，输出的one-hot encoding周围词对应位置为1。
 	
 ![image](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/embedding/pics/skipgram.png) 
 
 ### CBOW (continuous bag of words)
 
-用周围词预测中心词。一个长度为L+1滑动窗口对应1个训练样例。输入的one-hot encoding所有周围词位置为1，输出的one-hot encoding中心词对应位置为1。隐层会对所有周围词的词向量进行加和并且平均。
+用周围词预测中心词。一个长度为L的滑动窗口对应1个训练样例。输入的one-hot encoding所有周围词位置为1，输出的one-hot encoding中心词对应位置为1。隐层会对所有周围词的词向量进行加和并且平均。
 
 ![image](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/embedding/pics/cbow.png)
 	
@@ -80,3 +80,4 @@ Tomas Mikolov为代表的google学者们继而提出第二篇论文：Distribute
 * LDA/LSA
 * 哈夫曼编码
 
+*以上图片来源于网络和论文截图。*
