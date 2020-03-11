@@ -9,6 +9,7 @@ Mark notes related to Glove algorithm:
 
 ## Glove VS. Word2vec/Matrix Factorization algorithms
 
+test username
 
 ## Motivation of Glove
 
