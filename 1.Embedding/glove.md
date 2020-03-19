@@ -5,7 +5,6 @@ Mark notes related to **Glove** algorithm:
 * Comparison between **Glove** and **word2vec** or **LSA** (matrix factorization). 
 * Motivation of Glove.
 * Derivation of Glove.
-* Evaluation of word vectors.
 
 
 ## Glove vs. LSA vs. Word2vec
@@ -47,22 +46,7 @@ word2vec等方法，摒弃了矩阵的概念，利用词语和其上下文的词
 
 <a href="https://github.com/fionattu/nlp_algorithms/blob/master/embedding/pics/glove.pdf" target="_blank" rel="noopener">Glove目标函数推导</a>。推导过程非常开脑洞，基于启发式，不是因果关系。
 
-## 词向量的评估
 
-词向量的评估方法分为两种：
-
-### Intrinsic
-	
-**Word analogy(词类比)方法:** 一般是采用queen-king+man=women的方法，在一些公开的评测数据集上进行验证。即给定前三个词向量，看通过词向量运算后的结果向量是不是和第四个词的词向量最接近。
-	
-**词相似度方法:** 著名的WordSim353数据集，用人工标注的方法定义了词语间的相似度。
-	
-	
-### Extrinsic
-
-单从词语相似度来评估词向量的方法受到质疑，因为其对语料的变化(来源，大小等等)非常敏感，很多人认为词向量的好坏是task-specific，脱离实际任务的词向量是没有意义的。
-
-Extrinsic方法是把词向量输入一些具体的有标注的nlp任务，例如文本分类，Ner等，看效果是否有提升。
 	
 	
 	
