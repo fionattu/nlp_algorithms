@@ -61,43 +61,44 @@ x += v
 * 下降中后期时，在局部最小值来回震荡的时候，mu使得更新幅度增大，跳出陷阱
 * 在梯度改变方向的时候，mu能够减少更新 
 
-**总而言之，momentum项能够在相关方向加速SGD，抑制振荡，从而加快收敛**
+**总而言之，momentum项能够在相关方向加速SGD，抑制振荡，从而加快收敛。**
+
 
 
 下面介绍经典的优化方法：
 
 ### AdaGrad - 自适应的学习率
 
-	```
-	# Assume the gradient dx and parameter vector x 
-	cache += dx**2
-	x += -learning_rate * dx / np.sqrt(cache + eps) ## eps防止分母为0
-	```
+```
+# Assume the gradient dx and parameter vector x 
+cache += dx**2
+x += -learning_rate * dx / np.sqrt(cache + eps) ## eps防止分母为0
+```
 
-	* 前期dx较小的时候，np.sqrt(cache + 1e-8)较小，能够放大梯度
-	* 后期dx较大的时候，np.sqrt(cache + 1e-8)较大，能够约束梯度
-	* 适合处理稀疏梯度：稀疏梯度由于积累的梯度分母项较小，相比于其他梯度能被放大，从而加速收敛
-	* **缺点：中后期，分母上梯度平方的累加将会越来越大，使梯度->0，使得训练提前结束**
+* 前期dx较小的时候，np.sqrt(cache + 1e-8)较小，能够放大梯度
+* 后期dx较大的时候，np.sqrt(cache + 1e-8)较大，能够约束梯度
+* 适合处理稀疏梯度：稀疏梯度由于积累的梯度分母项较小，相比于其他梯度能被放大，从而加速收敛
+* **缺点：中后期，分母上梯度平方的累加将会越来越大，使梯度->0，使得训练提前结束**
 
 ### RMSProp - AdaGrad的变种
 
-	```
-	# Update rule for RMS prop
-	cache = decay_rate * cache + (1 - decay_rate) * dx**2 
-	x += -learning_rate * dx / (np.sqrt(cache) + eps)
-	```
-	Hinton在论文中使用decay_rate=0.9。解决了AdaGrad梯度急剧下降的问题。
+```
+# Update rule for RMS prop
+cache = decay_rate * cache + (1 - decay_rate) * dx**2 
+x += -learning_rate * dx / (np.sqrt(cache) + eps)
+```
+
+Hinton在论文中使用decay_rate=0.9。解决了AdaGrad梯度急剧下降的问题。
 	
 ### Adam - RMSProp + 动量
 
-	```
-	# Update rule for Adam
-	m = beta1*m + (1-beta1)*dx  # 动量
-	v = beta2*v + (1-beta2)*(dx**2) # RMSProp
-	x += -learning_rate * m / (np.sqrt(v) + eps)
-	```
-	**实践证明，Adam的表现比其他适应性方法要好。**
-
+```
+# Update rule for Adam
+m = beta1*m + (1-beta1)*dx  # 动量
+v = beta2*v + (1-beta2)*(dx**2) # RMSProp
+x += -learning_rate * m / (np.sqrt(v) + eps)
+```
+**实践证明，Adam的表现比其他适应性方法要好。**
 
 
 ## 其他
