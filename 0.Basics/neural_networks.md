@@ -18,11 +18,12 @@ ReLU > tanh > sigmod (ReLU训练快却效果好，多被采用)，见[详述]()�
 
 正则化是在loss目标函数加入一个权重可控($\lambda$)的**L2范数**优化，格式如下：
 
-图:regularization_loss
+![image](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/regularization.png)
 
 其中，L2范数是参数的平方和再开方。其作用是充当惩罚项，防止训练出来的参数太大，导致模型不稳定(输入稍微变化就可以引起结果的大波动)。$\lambda$的选择很重要: $\lambda$太大，容易导致学习出来的权重太小，模型很难学到有用的特征；$\lambda$太小，则失去正则化的效果，所以需要进行hyperparameter-tunning。
 
-图:L2_norm
+![image](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/L2_norm.png)
+
 
 注意偏置项不需要加入正则化，其与输入的特征数值无关，仅仅是在输出的结果加一个位移；对偏置项$b$进行正则化反而会让效果变差, 因为权重$w$都偏小，会让结果无法区别。可以参考[why-is-the-bias-term-not-regularized-in-ridge-regression](why-is-the-bias-term-not-regularized-in-ridge-regression)。
 
