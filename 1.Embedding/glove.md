@@ -37,14 +37,14 @@ word2vec等方法，摒弃了矩阵的概念，利用词语和其上下文的词
 
 模型来源于原文作者基于以下现象的观察：
 
-![image](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/embedding/pics/glove.png)
+![image](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/glove.png)
 
 其中k是ice和steam的上下文词语。第一二行是word2vec算法下k在给定词的概率。如果只看条件概率P(k | ice)或P(k | steam)，我们无法衡量k跟ice或steam到底有多相似。但如果通过概率的对比，我们可以看出，词对solid-ice比solid-steam更相关，因为P(k|ice)/P(k|steam)远远大过1；而gas-steam比gas-ice更相关，因为P(k|steam)/P(k|ice)远远小于1；比值接近1的，都相关或者都不相关。这个观察启发了作者：应该用条件概率的比值来建模而不是用概率本身。
  
 
 ## Derivation of Glove
 
-<a href="https://github.com/fionattu/nlp_algorithms/blob/master/embedding/pics/glove.pdf" target="_blank" rel="noopener">Glove目标函数推导</a>。推导过程非常开脑洞，基于启发式，不是因果关系。
+<a href="https://github.com/fionattu/nlp_algorithms/blob/master/pics/glove.pdf" target="_blank" rel="noopener">Glove目标函数推导</a>。推导过程非常开脑洞，基于启发式，不是因果关系。
 
 
 	
