@@ -16,7 +16,7 @@ ReLU > tanh > sigmod (ReLU训练快且效果好，被广泛采用)，见[激活�
 
 ### Regularization(正则化)
 
-正则化是在损失函数加入一个权重可控($\lambda$)的**L2范数**优化项，使得新的损失函数格式如下：
+正则化是在损失函数加入一个权重可控($\lambda$)的**L2范数**优化项，格式如下：
 
 ![image](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/regularization_loss.png)
 
@@ -43,11 +43,11 @@ Dropout是一个实际训练时可以灵活选择的trick。Dropout的工作机�
 
 ## Optimizers
 
-各种优化器主要涉及两方面的不同：**1）针对学习率$\alpha$(learning rate)的调整策略；2）利用动量的调整。**
+优化器主要涉及以下两种不同的优化策略：
 
-1）学习率：学习率决定了每次参数更新的步长，最终决定训练的速度。学习率太大，模型容易跳过全局最小值；学习率太小又会让训练过程花费太多时间，每次参数只有很小的调整，也很容易陷入局部最小点。有个手动设置学习率变化的方法叫annealing: 推荐大家从一个比较高的学习率开始然后慢慢降低学习率。一开始离全局最小值还较远，较大的学习率可以加快收敛；最后到全局最小值附近的时候，较小的学习率可以让损失函数慢慢逼近全局最优。除了让学习率随着时间指数减少: $a(t) = a_0\exp(-kt)$; 还有一个方法是: $a(t) = a_0\tau/max(t, \tau)$, 即设置一个时间点$\tau$, 让学习率开始减少。后者在实验中效果表现很好。
+**1）自适应学习率(learning rate)**：学习率决定了每次参数更新的步长，最终决定训练的速度。学习率太大，模型容易跳过全局最小值；学习率太小又会让训练过程花费太多时间，每次参数只有很小的调整，也很容易陷入局部最小点。有个手动设置学习率变化的方法叫annealing: 推荐大家从一个比较高的学习率开始然后慢慢降低学习率。一开始离全局最小值还较远，较大的学习率可以加快收敛；最后到全局最小值附近的时候，较小的学习率可以让损失函数慢慢逼近全局最优。除了让学习率随着时间指数减少: $a(t) = a_0\exp(-kt)$; 还有一个方法是: $a(t) = a_0\tau/max(t, \tau)$, 即设置一个时间点$\tau$, 让学习率开始减少。后者在实验中效果表现很好。
 
-2）动量(momentum)法：根据之前所有的梯度更新(方向和数值)决定下一步的更新策略。方法如下：
+**2）动量(momentum)法**：根据之前所有的梯度更新(方向和数值)决定下一步的更新策略。方法如下：
 
 ```
 # compute a standard momentum update on parameter x
@@ -61,18 +61,17 @@ x += v
 * 下降中后期时，在局部最小值来回震荡的时候，mu使得更新幅度增大，跳出陷阱
 * 在梯度改变方向的时候，mu能够减少更新 
 
-总而言之，momentum项能够在相关方向加速SGD，抑制振荡，从而加快收敛
-
+**总而言之，momentum项能够在相关方向加速SGD，抑制振荡，从而加快收敛**
 
 
 下面介绍经典的优化方法：
 
-* AdaGrad: 自适应的学习率，其中1e-8防止分母为0
+### AdaGrad - 自适应的学习率
 
 	```
 	# Assume the gradient dx and parameter vector x 
 	cache += dx**2
-	x += -learning_rate * dx / np.sqrt(cache + 1e-8)
+	x += -learning_rate * dx / np.sqrt(cache + eps) ## eps防止分母为0
 	```
 
 	* 前期dx较小的时候，np.sqrt(cache + 1e-8)较小，能够放大梯度
@@ -80,7 +79,7 @@ x += v
 	* 适合处理稀疏梯度：稀疏梯度由于积累的梯度分母项较小，相比于其他梯度能被放大，从而加速收敛
 	* **缺点：中后期，分母上梯度平方的累加将会越来越大，使梯度->0，使得训练提前结束**
 
-* RMSProp：AdaGrad的变种
+### RMSProp - AdaGrad的变种
 
 	```
 	# Update rule for RMS prop
@@ -89,7 +88,7 @@ x += v
 	```
 	Hinton在论文中使用decay_rate=0.9。解决了AdaGrad梯度急剧下降的问题。
 	
-* Adam：RMSProp + 动量
+### Adam - RMSProp + 动量
 
 	```
 	# Update rule for Adam
@@ -97,7 +96,7 @@ x += v
 	v = beta2*v + (1-beta2)*(dx**2) # RMSProp
 	x += -learning_rate * m / (np.sqrt(v) + eps)
 	```
-	实践证明，Adam的表现比其他适应性方法要好。
+	**实践证明，Adam的表现比其他适应性方法要好。**
 
 
 
