@@ -1,24 +1,24 @@
 ## Neurons(神经元)
 
-Neurons(神经元)是神经网络的最小组成部分。数据通过神经元的激活函数（activation function）进行非线性变换，而其他连接不同层的矩阵乘法均为线性变换，所以激活函数的存在很重要。
+Neurons(神经元)是神经网络的最小组成部分。数据通过神经元的激活函数（activation function）进行非线性变换，而神经网络不同层之间的矩阵乘法均为线性变换，所以激活函数的存在很重要。
 
 ### 激活函数
 
-ReLU > tanh > sigmod (ReLU训练快却效果好，多被采用)，见[详述]()。
+ReLU > tanh > sigmod (ReLU训练快且效果好，被广泛采用)，见[激活函数](https://github.com/fionattu/nlp_algorithms/blob/master/pics/derivation/activation_functions.pdf)。
 
 ## BP反向传播
 
-以NER任务为例子，从Elemental BP到vectorized BP：[推导]()。
+以NER任务为例子，推导Elemental BP和vectorized BP。参考[BP推导](https://github.com/fionattu/nlp_algorithms/blob/master/pics/derivation/back_prop.pdf)。
 
 ## Overfitting(过拟合)
 
-神经网络在样本数据太少，模型参数太多的情况下容易导致overfitting(过拟合)。**判断过拟合的标准，是出现训练集正确率较高/损失函数较小然而在测试集上预测正确率较低/损失函数较大的现象。**防止过拟合并提高模型泛化性能，可以引入regularization和dropout的方法。
+神经网络在样本数据少，模型参数太多的情况下容易导致过拟合。**判断过拟合的标准，是出现训练集正确率较高/损失函数较小然而在测试集上预测正确率较低/损失函数较大的现象。**防止过拟合并提高模型泛化性能，可以引入regularization和dropout的方法。
 
 ### Regularization(正则化)
 
-正则化是在loss目标函数加入一个权重可控($\lambda$)的**L2范数**优化，格式如下：
+正则化是在损失函数加入一个权重可控($\lambda$)的**L2范数**优化项，使得新的损失函数格式如下：
 
-![image](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/regularization.png)
+![image](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/regularization_loss.png)
 
 其中，L2范数是参数的平方和再开方。其作用是充当惩罚项，防止训练出来的参数太大，导致模型不稳定(输入稍微变化就可以引起结果的大波动)。$\lambda$的选择很重要: $\lambda$太大，容易导致学习出来的权重太小，模型很难学到有用的特征；$\lambda$太小，则失去正则化的效果，所以需要进行hyperparameter-tunning。
 
