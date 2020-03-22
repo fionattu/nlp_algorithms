@@ -44,7 +44,7 @@ word2vec等方法，摒弃了矩阵的概念，利用词语和其上下文的词
 
 ## Derivation of Glove
 
-<a href="https://github.com/fionattu/nlp_algorithms/blob/master/pics/glove.pdf" target="_blank" rel="noopener">Glove目标函数推导</a>。推导过程非常开脑洞，基于启发式，不是因果关系。
+<a href="https://github.com/fionattu/nlp_algorithms/blob/master/pics/derivation/glove.pdf" target="_blank" rel="noopener">Glove目标函数推导</a>。推导过程非常开脑洞，基于启发式，不是因果关系。
 
 
 	

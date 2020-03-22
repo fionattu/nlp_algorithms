@@ -29,7 +29,7 @@ word2vec属于自编码无监督学习，语料完全来自于文本，不需要
 
 ![image](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/cbow.png)
 	
-目标函数(objective function)和梯度下降的公式推导见<a href="https://github.com/fionattu/nlp_algorithms/blob/master/pics/w2v_derivation.pdf" target="_blank" rel="noopener">w2v公式推导</a>。
+目标函数(objective function)和梯度下降的公式推导见<a href="https://github.com/fionattu/nlp_algorithms/blob/master/pics/derivation/w2v.pdf" target="_blank" rel="noopener">w2v公式推导</a>。
 
 ## Word2Vec Tricks
 

@@ -1,7 +1,7 @@
 
 ## Embedding Models
-* <a href="https://github.com/fionattu/nlp_algorithms/blob/master/embedding/word2vec.md" target="_blank" rel="noopener">Word2vec: skipgram, CBOW</a>
-* <a href="https://github.com/fionattu/nlp_algorithms/blob/master/embedding/glove.md" target="_blank" rel="noopener">Glove</a>
+* <a href="https://github.com/fionattu/nlp_algorithms/blob/master/1.Embedding/word2vec.md" target="_blank" rel="noopener">Word2vec: skipgram, CBOW</a>
+* <a href="https://github.com/fionattu/nlp_algorithms/blob/master/1.Embedding/glove.md" target="_blank" rel="noopener">Glove</a>
 
 
 ## 词向量的评估
