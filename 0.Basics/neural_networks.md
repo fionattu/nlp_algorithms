@@ -1,3 +1,5 @@
+**Fundamentals of Neural Networks**, including basic concepts and pratical tricks.
+
 ## Neurons(神经元)
 
 Neurons(神经元)是神经网络的最小组成部分。数据通过神经元的激活函数（activation function）进行非线性变换，而神经网络不同层之间的矩阵乘法均为线性变换，所以激活函数的存在很重要。
