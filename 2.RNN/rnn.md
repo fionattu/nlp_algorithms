@@ -29,11 +29,18 @@ RNN不是特指语言模型，只是一种用来对语言进行建模的方法�
 
 ### 评估标准
 
-### 梯度消失、梯度爆炸
+### Long-term Dependencies, Gradient Vanishing/Exploding
+
+https://zhuanlan.zhihu.com/p/85776566
 
 ## Advanced RNN
 
 ### LSTM
+
+http://colah.github.io/posts/2015-08-Understanding-LSTMs/
+
+为什么LSTM可以缓解RNN的梯度问题：
+https://medium.com/datadriveninvestor/how-do-lstm-networks-solve-the-problem-of-vanishing-gradients-a6784971a577
 
 ### GRU
 
