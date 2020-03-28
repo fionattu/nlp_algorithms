@@ -25,7 +25,7 @@ trigrams: “the students opened”, “students opened their”
 
 ![image](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/ngram_1.png)
 
-最后转换成计算n-gram和(n-1)-gram的联合概率，而联合概率本质在文本中对出现的序列进行统计，记录出现的次数，如下：
+最后转换成计算n-gram和(n-1)-gram的联合概率，而联合概率本质是在文本中对出现的序列进行统计，记录出现的次数，如下：
 
 ![image](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/ngram_2.png)
 
