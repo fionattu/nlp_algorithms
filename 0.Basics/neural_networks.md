@@ -1,4 +1,4 @@
-**Fundamentals of Neural Networks**, including basic concepts and pratical tricks.
+**Fundamentals of Neural Networks**, including basic concepts and practical tricks.
 
 ## Neurons(神经元)
 
