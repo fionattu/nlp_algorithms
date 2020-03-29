@@ -47,6 +47,7 @@ RNN中文翻译为循环神经网络，结构参见下图。从图中我们可�
 
 ![image](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/rnn.png)
 
+
 * 模型的输入分先后顺序，后面的词依赖于前面的词；
 * h指的是模型的隐藏层(hidden state，由多个神经元组成)，ht特指在t这个timestep(第t个输入)的时候隐藏层的值；
 * 其中recurrent(循环)指的是计算ht的时候，作用于h(t-1)的权重矩阵Whh是相同的(hh维度)；
@@ -76,28 +77,44 @@ RNN虽然解决了Window-based Neural Language Model的缺点：可以处理任�
 
 **出现梯度消失有什么后果呢？**在反向传播时，因为梯度消失，后面的梯度传到越前面的timesteps时会越小，这样后面的单词对于距离比较远的前面的单词的影响会很小，模型最终学不到两者的相互关系（Long-term Dependencies）。这样就失去了rnn的作用。
 
-**而出现梯度爆炸又会有什么后果？**反向传播时参数更新的幅度太大，loss一直处于震荡状态，最差可能导致结果溢出(无穷，nan值)，无法达到全局最优解。解决方法：gradient clipping。当梯度达到一定的阈值，就把他们设置回一个小一些的数字。
+**而出现梯度爆炸又会有什么后果？**反向传播时参数更新的幅度太大，loss一直处于震荡状态，最差可能导致结果溢出(无穷，nan值)，无法达到全局最优解。解决方法：gradient clipping梯度截断。当梯度达到一定的阈值，就把他们设置回一个小一些的数字。
 
 
 
 ## Advanced RNN
 
-### LSTM
+### Long Short-Term Memory (LSTM)
 
-LSTM的结构
+LSTM的结构如下图所示。可以看到除了隐藏层输出ht，每个LSTM单元还有个ct项，它有记忆功能，保留了之前所有输入的信息。通过下图，我们可以总结LSTM的相关概念和工作方式。
 
 ![image](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/lstm.png)
+
+**三个states**：
+
+* **ct~:** new memory generation
+* **ct (cell state)**: final memory generation
+* **ht (hidden state)**: predictive vector
+
+**三个gates：forget/input/output gates**。每个gate的输入结合了上一个ht-1和当前输入xt，再通过一个神经网络层**(权重矩阵**)和**sigmoid激活函数**产生(0,1)概率分布，element-wise地决定哪些信息需要保留/舍弃以及需要保留/舍弃多少。
+
+* **forget gate (遗忘门)**: 决定ct-1的哪些特征用于计算ct
+* **input gate (输入门)**: 决定ct~哪些特征用于计算ct
+
+以上两个gates可以决定当前记忆项ct的输出，ct取决于ct-1和ct~
+
+* **output gate (输出门)**: 决定ct哪些特征用于计算ht
+
+LSTM为什么能够解决RNN的long-term dependencies的问题呢？首先，ct-1如同一个记忆项，通过forget gate把之前所有timestep的信息传递到当前的timestep里。其次，gate机制也使得lstm的梯度消失或爆炸变得更加容易控制。更多重要推导参考[lstm公式推导如何保留长依赖](https://github.com/fionattu/nlp_algorithms/blob/master/pics/derivation/lstm.pdf)。
 
 其他资源：
 
 * [如何理解LSTM](http://colah.github.io/posts/2015-08-Understanding-LSTMs/)
-* [LSTM如何缓解梯度消失](https://medium.com/datadriveninvestor/how-do-lstm-networks-solve-the-problem-of-vanishing-gradients-a6784971a577)
-
-
-In LSTMs, however, the presence of the forget gate, along with the additive property of the cell state gradients, enables the network to update the parameter in such a way that the different sub gradients in 
+* [LSTM如何缓解梯度消失](https://medium.com/datadriveninvestor/how-do-lstm-networks-solve-the-problem-of-vanishing-gradients-a6784971a577) 
 
 ### GRU
 
 ### Bidirectional RNNs
 
 ### Multi-layer RNNs
+
+*注：本文图片来自stanford cs224n 2019 winter sem。*
