@@ -69,16 +69,14 @@ RNN中文翻译为循环神经网络，结构参见下图。从图中我们可�
 RNN虽然解决了Window-based Neural Language Model的缺点：可以处理任意长度的语言序列(因为权重共享，模型大小确定)，但其也存在一些严重的问题，导致长处无法发挥。
 
 1. 输入有前后顺序，后面的单词的隐藏层计算需要依赖上一个词的隐藏层计算结果，导致计算无法并行，大大降低了训练速度；
-* 存在严重的梯度消失和梯度爆炸问题，导致模型的亮点**long-term dependencies**无法学到。
+2. 存在严重的梯度消失和梯度爆炸问题，导致模型的亮点**long-term dependencies**无法学到。
 
 
 **梯度消失和梯度爆炸是深度学习的普遍问题**，当网络越深时这个问题越明显。而rnn的权重矩阵Whh叠乘更加重这个问题。rnn为什么会出现梯度消失或爆炸？参考[rnn梯度消失和梯度爆炸推导](https://github.com/fionattu/nlp_algorithms/blob/master/pics/derivation/rnn.pdf)。
 
+**出现梯度消失有什么后果呢**？在反向传播时，因为梯度消失，后面的梯度传到越前面的timesteps时会越小，这样后面的单词对于距离比较远的前面的单词的影响会很小，模型最终学不到两者的相互关系（Long-term Dependencies）。这样就失去了rnn的作用。
 
-**出现梯度消失有什么后果呢？**在反向传播时，因为梯度消失，后面的梯度传到越前面的timesteps时会越小，这样后面的单词对于距离比较远的前面的单词的影响会很小，模型最终学不到两者的相互关系（Long-term Dependencies）。这样就失去了rnn的作用。
-
-**而出现梯度爆炸又会有什么后果？**反向传播时参数更新的幅度太大，loss一直处于震荡状态，最差可能导致结果溢出(无穷，nan值)，无法达到全局最优解。解决方法：gradient clipping梯度截断。当梯度达到一定的阈值，就把他们设置回一个小一些的数字。
-
+**而出现梯度爆炸又会有什么后果**？反向传播时参数更新的幅度太大，loss一直处于震荡状态，最差可能导致结果溢出(无穷，nan值)，无法达到全局最优解。解决方法：gradient clipping梯度截断。当梯度达到一定的阈值，就把他们设置回一个小一些的数字。
 
 
 ## Advanced RNN
@@ -95,7 +93,7 @@ LSTM的结构如下图所示。可以看到除了隐藏层输出ht，每个LSTM�
 * **ct (cell state)**: final memory generation
 * **ht (hidden state)**: predictive vector
 
-**三个gates：forget/input/output gates**。每个gate的输入结合了上一个ht-1和当前输入xt，再通过一个神经网络层**(权重矩阵)**和**sigmoid激活函数**产生(0,1)概率分布，element-wise地决定哪些信息需要保留/舍弃以及需要保留/舍弃多少。
+**三个gates：forget/input/output gates**。每个gate的输入结合了上一个ht-1和当前输入xt，再通过一个神经网络层（**权重矩阵**）和**sigmoid激活函数**产生(0,1)概率分布，element-wise地决定哪些信息需要保留/舍弃以及需要保留/舍弃多少。
 
 * **forget gate (遗忘门)**: 决定ct-1的哪些特征用于计算ct
 * **input gate (输入门)**: 决定ct~哪些特征用于计算ct
@@ -123,7 +121,7 @@ GRU的基本结构：
 
 ![image](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/gru_1.png)
 
-与LSTM相比，GRU参数少，训练起来更快，但没有证据证明哪个在效果上更好。LSTM在训练长依赖上比较有优势。所以一般模型选择是先选择LSTM, 如果效率不行再转用GRU。
+**与LSTM相比，GRU参数少，训练起来更快，但没有证据证明哪个在效果上更好。LSTM在训练长依赖上比较有优势。所以一般模型选择是先选择LSTM, 如果效率不行再转用GRU**。
 
 
 ### Bidirectional RNNs
@@ -138,7 +136,7 @@ GRU的基本结构：
 
 ### Multi-layer RNNs
 
-越深的rnn往往表现越好。低层的rnn主要提取了语法特征，高层的rnn能够提取语义特征。因为无法并行训练，rnn一般都没有cnn深。有论文指出，在机器翻译中2-4层往往效果最好。如果需要更深的网络，需要采用skip-connections/dense-connections防止梯度消失或爆炸。
+越深的rnn往往表现越好。**低层的rnn主要提取了语法特征，高层的rnn能够提取语义特征**。因为无法并行训练，rnn一般都没有cnn深。有论文指出，在机器翻译中2-4层往往效果最好。如果需要更深的网络，需要采用skip-connections/dense-connections防止梯度消失或爆炸。
 
 ![image](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/mulrnn.png)
 
