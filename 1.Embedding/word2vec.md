@@ -79,5 +79,6 @@ Tomas Mikolov为代表的google学者们继而提出第二篇论文：Distribute
 * svd方法
 * LDA/LSA
 * 哈夫曼编码
+* Hierachical softmax和negative sampling只节省了train的计算量但没节省test的计算量？
 
 *以上图片来源于网络和论文截图。*

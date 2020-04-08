@@ -18,3 +18,5 @@ how attention work in NMT
 can deal with long sentence
 
 ## Evaluation of Machine Translation Systems
+
+* BLEU
