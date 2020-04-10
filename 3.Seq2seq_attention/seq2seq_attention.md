@@ -3,7 +3,7 @@
 
 Mark notes related to:
 
-* Neural Machine Translation (NMT) with seq2seq
+* Neural Machine Translation (NMT) with Seq2Seq
 * Attention Mechanism
 * Evaluation of NMT: BLEU
 
@@ -17,7 +17,7 @@ Seq2seq(Sequence-to-sequence)模型由两个RNN的神经网络模型构成，也
 
 ![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/seq2seq.png)
 
-### Sequence-to-sequence Architecture - encoder
+### Seq2Seq Architecture - Encoder
 
 Encoder实质是个RNN网络，图中的hidden state可以来自vanilla/LSTM/GRU rnn，也可以把这些模型变得更复杂，变成bidirectional/multi-layer(stacked) rnn等等。实际训练中，encoder常用stacked LSTM。而且在机器翻译任务中，为了使得***输入句子***前面的词能对***输出句子***前面的词有更强的作用力，输入句子经常是倒序输入到encoder中。例如下图的stacked LSTM encoder：
 
@@ -29,7 +29,7 @@ Encoder实质是个RNN网络，图中的hidden state可以来自vanilla/LSTM/GRU
 
 相比于统计翻译模型（需要维护词语/词语或者短语/短语的概率分布），神经网络模型涉及的人力和工程量大大减少，而且可以实现端到端的翻译模型优化。有趣的是，谷歌翻译在他们的NMT模型输出设置多一个语言参数，指定语言类型，可以实现一对多的seq2seq参数共享。
 
-### Sequence-to-sequence Architecture - decoder
+### Seq2Seq Architecture - Decoder
 
 ![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/decoder.png)
 
