@@ -39,11 +39,11 @@ Decoder实质也是个RNN网络，但它和encoder不同的是，**它的输入�
 
 ![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/beamsearch.png)
 
-Beam Search如果产生了<end>的标识符代表句子结束。最终我们会得到多个可能以<start>开始，以<end>结尾的句子，那么如何让decoder终止呢？一般是通过设置<end>或者timestep的个数来暂停beam search的过程。上图的概率公式存在一个问题，由于log小于0，随着句子的增长，概率会越来越小，这样导致短句往往能获得更高的分数。一般对分数再取长度的平均:
+Beam Search如果产生了<'end'>的标识符代表句子结束。最终我们会得到多个可能以<'start'>开始，以<end>结尾的句子，那么如何让decoder终止呢？一般是通过设置<'end'>或者timestep的个数来暂停beam search的过程。上图的概率公式存在一个问题，由于log小于0，随着句子的增长，概率会越来越小，这样导致短句往往能获得更高的分数。一般对分数再取长度的平均:
 
 ![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/ave_beamsearch.png)
 
-**在training阶段**，Decoder每个timestep的输出和word2vec的处理方式一样，通过softmax后用交叉熵来最小化损失函数。但由于softmax存在计算量大的问题，又会引入类似hierachical softmax或negatve sampling的方法来解决这个问题。
+**在training阶段**，decoder每个timestep的输出和word2vec的处理方式一样，通过softmax后用交叉熵来最小化损失函数。但由于softmax存在计算量大的问题，又会引入类似hierachical softmax或negatve sampling的方法来解决这个问题。
 
 ## Attention Mechanism
 
