@@ -3,17 +3,17 @@
 
 Mark notes related to:
 
-* Neural Machine Translation (NMT) with Seq2Seq
+* Neural Machine Translation (NMT) with seq2seq
 * Attention Mechanism
 * Evaluation of NMT: BLEU
 
 ## Neural Machine Translation with Seq2Seq
 
-2014年，第一篇Seq2seq论文问世；2016年，google翻译从统计方法换成Seq2seq方法。为什么Seq2seq这么神奇？什么是Seq2seq？
+2014年，第一篇seq2seq论文问世；2016年，google翻译从统计方法换成seq2seq方法。为什么seq2seq这么神奇？什么是seq2seq？
 
 Seq2seq(Sequence-to-sequence)模型由两个RNN的神经网络模型构成，也称为**encoder-decoder模型**。其输入和输出都是一个句子。Encoder负责把输入句子编码成一个固定大小的向量H，decoder通过学习把H解码成句子 (可以理解成语言模型，通过上文预测下一个词)。**Seq2seq可以用于机器翻译，对话系统，自动文摘，一般和Attention机制结合提高模型性能**。本文从机器翻译出发来解释这个模型。
 
-不包含Attention机制的Seq2seq(Sequence-to-sequence)模型流程可以用下图来表示：
+不包含Attention机制的seq2seq(sequence-to-sequence)模型流程可以用下图来表示：
 
 ![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/seq2seq.png)
 
