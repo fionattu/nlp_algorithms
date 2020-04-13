@@ -44,7 +44,7 @@ Pure char-level NMT 训练特别慢
 
 ### Architecture
 
-论文算法模型，依旧遵循encoder-decoder的结构。按照论文的设置，encoder和decoder均为6个transformer组成，最底层输入是word embedding(dim=512)，之后每一层的输入都为上一层的输出, dim均为512。如下图，左边为encoder，右边是decoder。
+论文算法模型，依旧遵循encoder-decoder的结构。按照论文的设置，encoder和decoder均为6个transformer组成，最底层输入是word embedding (dim=512)，之后每一层的输入都为上一层的输出, dim均为512。如下图，左边为encoder，右边是decoder。
 
 ![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/transformer_whole.png)
 
@@ -66,27 +66,67 @@ Pure char-level NMT 训练特别慢
 
 **One-head Attention**
 
-原文提出的Multi-head Attention是重复执行8个One-head Attention。首先我们来了解One-head Attention的流程。
+原文提出的Multi-head Attention是重复执行8个One-head Attention。首先我们来了解One-head Attention的流程。以下的例子表示第一个encoder的self-attention模块（第一个encoder的输入是word embedding，处理方式跟word2vec没有差别）：
+
+(1) 首先每个输入**xi需要产生三个维度更小的vectors: query qi, key ki, value vi**(dim=64)。这三个vectors的产生方法是通过与三个矩阵进行点乘得出的，分别是WQ, WK, WV。**这三个矩阵是通过训练得到，并且对每个xi共享**。query qi, key ki, value vi正是attention机制的一个运用，只不过在seq2seq，这些向量是用hidden states，而transformer专门为每个输入产生了三个不同角色的vectors。
 
 ![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/self_attention_0.png)
 
+(2) 得到qi, ki, vi后，我们就可以像在seq2seq中一样来计算attention score了。假设我们的sequence只有两个词：Thinking Machines，下图黑线条方框展示的是“Thinking”这个词的attention计算方法。我们假设我们的query是从“Thinking”发出的，所以我们用q1跟所有的keys(k1, k2)分别进行点乘(包含自己)，这样得出的score代表当我们对“Thinking”进行编码时，所有词语加在这个词上的权重。
+
+(3) 接着论文对这个score进行细微的处理：除于keys的维度的平方根，可以使得梯度更平缓。最后所有分数经过softmax进行归一化得到概率。每个词的概率再和他们的vectors vi进行相乘得到weighted vectors，然后所有词语的weighted vectors加和得到“Thinking”的输出z1。这个z1经过处理后会输入transformer的ffnn模块。
+
+
 ![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/self_attention_1.png)
+
+**注意在decoder中，attention只能和前序词语参与计算，因为从LM角度来讲，后面的词语对当前词语的预测没有影响。**
 
 **Multi-head Attention**
 
+文章中，作者说他们发现使用多个One-head Attention是“benefitial”的，于是他们提出Multi-head Attention的概念。Multi-head Attention具体是如何运作的呢？
+
+
+我们可以想象每个head是不受影响的，我们可以同时做多次One-head Attention，但每次我们的线性变换矩阵WQ, WK, WV都是不一样的，所以根据同一个xi我们会得到不同的query qi, key ki, value vi，如下图：
+
+![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/multihead_0.png)
+
+这样如果我们有8个head，那最后我们得到8个不同的zi：
+
+![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/multihead_1.png)
+
+模型的做法不是对不同的zi取平均，而是把他们concat在一起，得到一个更大的zi，然后需要跟w0相乘:
+
+![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/multihead_2.png)
+
+Multi-head Attention整个过程可以用下图表示，注意最终的z和x的维度一样(dim=512)。
+
+![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/multihead_3.png)
+
+Multi-head Attention确实能给模型带来性能的提升。通过查阅资料，发现有较多论文表明，不同层的attention是有其作用的，底层主要提取词语的语法特征，顶层主要提取语义特征。既然同一层的作用一样，attention的输入也一样，设置多头的作用是什么呢？目前有多种说法尚未得到充分证实：
+
+1. 提取不同特征（有可视化发现的确每个头提取的pattern是不一样的）；
+2. 等于ensemble功能
+3. dropout功能；
+
+论文还说明，head的数量不在多，2的表现差，但4，6，8的表现是差不多的。
+
+
 ### Encoder: Positional Encoding 
+
+因为丢失掉RNN的word order信息，一开始word embedding还考虑了位置编码:
+
+![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/multihead_4.png)
 
 ### Decoder: Encoder-Decoder Attention
 
+正如以上所提的，decoder和encoder一样，但是多加了一层Encoder-Decoder Attention，来选择encoder不同输出的权重。注意在这个模块中，key和value vectors是由最后一层encoder的输出计算出来的，而query vectors是由decoder每一层的self-attention的输出提供的：
 
-
-* Mask
-
-### Comparison with RNN-based Model
+![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/en_decoder_attention.png)
 
 
 
 ## More
+* performance of transformers
 * tensor2tensor
 * Residual Connection
 
