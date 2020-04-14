@@ -2,32 +2,66 @@
 
 Mark notes related to:
 
-* Subword Models
+* Subword Models - Wordpieces
 * Pre-trained Concepts (fine-tuning/network freezing) in LM: TagLM, Elmo, ULMfit
 * Transformers: Attention is all you need
 * Bert
 
-## Subwords Model
+## Subword Models
 
 ### Motivation
 
+Subword model是一种介于word-level和character-level的方法。首先word-level模型不能处理**未登录词(OOV, Out-Of-Vocabulary)**，即训练集不存在但是验证集或者测试集存在的单词; 而char-level模型虽然能解决OOV问题，但它会使序列变长，在rnn模型中性能会受影响，最后输出从char到word的处理也耗费时间和影响正确性 （目前的pure char model似乎表现都不错）。
 
-* OOV Problem
-* Morphology
-
-### Subword Model Basics
-
-Pure char-level NMT 训练特别慢
 
 ### Two Trends
 
-* Word pieces: 
- 	1. BPE 
- 	2. Wordpiece/Sentencepiece of Google/Bert
- 	3. learning word representation from char level
-* Hybrid 
+而subword models结合了word-model和char-model的优势。目前有两大趋势：
 
-### Other Inspiration from Char-based Model: FastText Embeddings
+#### Wordpieces
+
+根据char在corpus出现的频率**对连续的字节进行两两结合**，这样就把corpus拆分成char或者连续的char序列。谷歌的bert模型就把输入都处理成wordpieces的格式。经典的有**BPE算法(Byte-Pair Encoding)**。
+ 
+**BPE**只是一种字节编码方法。给定一个corpus，BPE能帮助产生目标词库。注意其关注的是**连续**的**两个**字节。举一个经典的例子。
+
+1）假设我们最初的字典是 (前面对应词频)：
+
+```
+5 l o w
+2 l o w e r
+6 n e w e s t 
+3 w i d e s t
+```
+那我们的词汇表初始化的时候必须先包含字符级别的：l, o, w, e, r, n, w, s, t, i, d。
+
+2）然后我们观察到es出现了最高的9次，那我们把es结合，并且更新我们的词汇表为：l, o, w, e, r, n, w, s, t, i, d, es。
+
+```
+5 l o w
+2 l o w e r
+6 n e w es t 
+3 w i d es t
+```
+
+3）紧接着我们观察到est出现了最高的9次，那我们把est结合，并且更新我们的词汇表为：l, o, w, e, r, n, w, s, t, i, d, es, est。
+
+```
+5 l o w
+2 l o w e r
+6 n e w est 
+3 w i d est
+```
+以此类推，**最后设置一个wordpieces词汇表阈值或者直至下一个wordpiece频率为1即停止**。
+
+#### Hybrid
+
+只保持一个较小的常用word字典，其他的均用<'unk'>代替，并且如果输入输出的序列遇到<‘unk’>，即进入额外的rnn模型进行处理。如果出现两个rnn模型，loss需要相加。
+
+### Other Inspiration from Subword Models
+
+* FastText embeddings (FAIR of Fackbook)
+
+* Represent words by char-embedding
 
 ## Transformers
 
@@ -129,7 +163,8 @@ Multi-head Attention确实能给模型带来性能的提升。通过查阅资料
 * performance of transformers
 * tensor2tensor
 * Residual Connection
-
+* char-models
+* google还采用sentencepieces方法, 参考[sentencepieces](https://github.com/google/sentencepiece)
 * image/music transformer
 
 
