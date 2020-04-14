@@ -63,6 +63,8 @@ Subword model是一种介于word-level和character-level的方法。首先word-l
 
 * Represent words by char-embedding
 
+## Pre-trained Models: TagLM, Elmo, ULMfit
+
 ## Transformers
 
 在Transformer问世之前，[加入attention机制的seq2seq模型 (encoder-decoder)](https://github.com/fionattu/nlp_algorithms/blob/master/3.Seq2seq_attention/seq2seq_attention.md)在各个任务上已经取得了很大的提升，但rnn模型的顺序处理无法并行化，使得它的训练过程特别耗时；LSTM等门机制也只能缓解rnn的长依赖问题。rnn的优点是能考虑上下文信息对句子进行编码，既然attention这么强大且能自己学习上下文的权重，如果再加入词语顺序（order）的信息，是否也能取代rnn呢？2017年google发表了论文“Attention is all you need”，在机器翻译上取得了很好的效果 (英德翻译中，BLEU提升2）。他们在论文中提出transformer模型，后来一举成名的BERT也是基于transformer构建的。
