@@ -65,6 +65,22 @@ Subword model是一种介于word-level和character-level的方法。首先word-l
 
 ## Pre-trained Models: TagLM, Elmo, ULMfit
 
+### Context-specific Word Embeddings
+
+迄今为止我们学习了训练word embedding的多种方法：word2vec, Glove和fasttext，它们提供了pre-trained word vectors (事先训练好的词向量)给大家直接用于nlp的不同任务训练。但是我们也发现了问题。首先，**词语是具有多义的，但pre-trained word vectors一个词只用一个向量表示**，我们想要的是更细粒度(fine-grained)的词向量；然后我们也发现，在语言模型(LM: predict next word)中，rnn在每个词的hidden state位置都能结合上下文产生这个词的encoding。那么，我们可以通过结合rnn学到**Context-specific Word Embeddings**吗？这样能提高下游nlp任务的表现吗？针对这个启发，有一系列包含pretraining思想的模型开始问世，并且在不同的nlp任务上取得突破。
+
+### ELMo：Embeddings from Language Models
+
+在2018年ELMo提出之前，这篇文章的第一作者在2017年发表了另一篇论文TagLM (Semi-supervised sequence tagging with bidirectional language models, cited by 245 on 2020/04/15)，其中心思想是用LM预训练的word embedding协助基于rnn模型的NER任务，大致的结构如下图：
+
+![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/taglm.png)
+
+其中word embeding和LM都是事先训练好的，然后直接放进左图的模型中进行NER任务的训练。ELMo (Deep contextualized word representations, cited by 2655 on 2020/04/15)也是基于这个思想进行进一步的改造。
+
+![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/elmo.png)
+
+ELMo用stacked biLSTM（文中为两层）在大数据集上进行LM的无监督训练。**最初上下文无关的词向量是通过cnn对字符级进行编码得到**。然后把forward和backward同一层每个词的hidden state拼接起来变成xi，用不同权重si来对xi加权求和，最后得到一个词的ELMo表示(之所以用不同层来表示，是作者在文章中指明不同层表示的是不同特征，比如底层表示语法，顶层表示语义)。这个向量随后会放进下游的nlp任务中参与训练，而si是通过训练来获取的。**ELMo通过这种方式成功地把word embedding变成动态，LM训练好之后，输入句子可以实时得到word embedding**。
+
 ## Transformers
 
 在Transformer问世之前，[加入attention机制的seq2seq模型 (encoder-decoder)](https://github.com/fionattu/nlp_algorithms/blob/master/3.Seq2seq_attention/seq2seq_attention.md)在各个任务上已经取得了很大的提升，但rnn模型的顺序处理无法并行化，使得它的训练过程特别耗时；LSTM等门机制也只能缓解rnn的长依赖问题。rnn的优点是能考虑上下文信息对句子进行编码，既然attention这么强大且能自己学习上下文的权重，如果再加入词语顺序（order）的信息，是否也能取代rnn呢？2017年google发表了论文“Attention is all you need”，在机器翻译上取得了很好的效果 (英德翻译中，BLEU提升2）。他们在论文中提出transformer模型，后来一举成名的BERT也是基于transformer构建的。
