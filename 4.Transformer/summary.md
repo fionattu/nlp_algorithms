@@ -81,6 +81,20 @@ Subword model是一种介于word-level和character-level的方法。首先word-l
 
 ELMo用stacked biLSTM（文中为两层）在大数据集上进行LM的无监督训练。**最初上下文无关的词向量是通过cnn对字符级进行编码得到**。然后把forward和backward同一层每个词的hidden state拼接起来变成xi，用不同权重si来对xi加权求和，最后得到一个词的ELMo表示(之所以用不同层来表示，是作者在文章中指明不同层表示的是不同特征，比如底层表示语法，顶层表示语义)。这个向量随后会放进下游的nlp任务中参与训练，而si是通过训练来获取的。**ELMo通过这种方式成功地把word embedding变成动态，LM训练好之后，输入句子可以实时得到word embedding**。
 
+ELMo预训练模型的加入提升了所有nlp下游任务的性能，超越了当时各个任务state-of-the-art的方法。
+
+![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/elmo_exp.png)
+
+### ULMfit: Universal Language Model Fine-tuning for Text Classification
+
+2018年是让人惊喜的一年，除了ELMo，还有ULMfit也让人惊艳。ELMo是nlp预训练模型的鼻祖，而ULMfit开启了nlp迁移学习(transfer learning)和微调(fine-tuning)的新天地。
+
+最早的迁移学习思想是来自于计算机视觉，我们可以在一个domain上训练好cnn模型后，迁移到另一个domain进行微调。第二个domain通常数据量少。而ULMfit也是借用了这种思想，先在通用大数据集wiki上对LM进行预训练(pretrain), 然后迁移到具体的nlp任务上，在目标域数据集上对LM进行微调。作者提出了discriminative fine-tuning(不同层用不同的学习率)，slanted triangular learning rates(学习率调整方法)。
+
+
+在分类任务上取得很好的提升：
+![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/ulmfit_exp.png)
+
 ## Transformers
 
 在Transformer问世之前，[加入attention机制的seq2seq模型 (encoder-decoder)](https://github.com/fionattu/nlp_algorithms/blob/master/3.Seq2seq_attention/seq2seq_attention.md)在各个任务上已经取得了很大的提升，但rnn模型的顺序处理无法并行化，使得它的训练过程特别耗时；LSTM等门机制也只能缓解rnn的长依赖问题。rnn的优点是能考虑上下文信息对句子进行编码，既然attention这么强大且能自己学习上下文的权重，如果再加入词语顺序（order）的信息，是否也能取代rnn呢？2017年google发表了论文“Attention is all you need”，在机器翻译上取得了很好的效果 (英德翻译中，BLEU提升2）。他们在论文中提出transformer模型，后来一举成名的BERT也是基于transformer构建的。
@@ -175,7 +189,15 @@ Multi-head Attention确实能给模型带来性能的提升。通过查阅资料
 
 ![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/en_decoder_attention.png)
 
+### GPT
 
+### BERT
+
+## 论文精读
+
+* TagLM: Semi-supervised sequence tagging with bidirectional language models
+* ELMo: Deep contextualized word representations
+* ULMfit: Universal Language Model Fine-tuning for Text Classification
 
 ## More
 * performance of transformers
