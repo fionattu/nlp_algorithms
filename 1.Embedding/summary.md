@@ -3,6 +3,14 @@
 * <a href="https://github.com/fionattu/nlp_algorithms/blob/master/1.Embedding/word2vec.md" target="_blank" rel="noopener">Word2vec: skipgram, CBOW</a>
 * <a href="https://github.com/fionattu/nlp_algorithms/blob/master/1.Embedding/glove.md" target="_blank" rel="noopener">Glove</a>
 
+## References
+
+* 腾讯AI实验室词向量
+* 论文精读
+	1. Word2Vec 2013: [Distributed Representations of Words and Phrases and their Compositionality](https://papers.nips.cc/paper/5021-distributed-representations-of-words-and-phrases-and-their-compositionality.pdf)
+	2. Glove 2014:[GloVe: Global Vectors for Word Representation](https://www.aclweb.org/anthology/D14-1162.pdf) 
+	3. FastText 2016: [Bag of Tricks for Efficient Text Classification](https://arxiv.org/pdf/1607.01759.pdf) 
+
 
 ## 词向量的评估
 
