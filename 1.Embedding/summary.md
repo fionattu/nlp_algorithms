@@ -7,10 +7,18 @@
 
 * 腾讯AI实验室词向量
 * 论文精读
-	1. Word2Vec 2013: [Distributed Representations of Words and Phrases and their Compositionality](https://papers.nips.cc/paper/5021-distributed-representations-of-words-and-phrases-and-their-compositionality.pdf)
+	1. Word2Vec 2013 of Google: [Distributed Representations of Words and Phrases and their Compositionality](https://papers.nips.cc/paper/5021-distributed-representations-of-words-and-phrases-and-their-compositionality.pdf)
 	2. Glove 2014: [GloVe: Global Vectors for Word Representation](https://www.aclweb.org/anthology/D14-1162.pdf) 
-	3. FastText 2016: [Bag of Tricks for Efficient Text Classification](https://arxiv.org/pdf/1607.01759.pdf) 
+	3. FastText 2016 of Facebook Fair: [Bag of Tricks for Efficient Text Classification](https://arxiv.org/pdf/1607.01759.pdf) 
+	4. DSG 2018 of Tencent AI Lab: [Directional Skip-Gram: Explicitly Distinguishing Left and Right Context for Word Embeddings](https://www.aclweb.org/anthology/N18-2028.pdf)
 
+## 中文预训练词向量
+
+### 上百种不同语料的预训练中文词向量
+北京师范大学和中国人民大学合作并开源的[Github地址](https://github.com/Embedding/Chinese-Word-Vectors)。他们抓取了不同语料：百度百科，中文维基百科，人民日报，搜狗新闻，金融新闻，知乎问答，微博，文学作品等，来训练不同领域的词向量。**这些语料大小在1-6G，单词总数在百万量级。他们使用HanLP进行分词，采用带负采样优化的skip-gram模型来训练词的稠密表示(d=300)以及使用PPMI(基于SVD)的方法来训练词的稀疏表示**。
+
+### 腾讯AI实验室开源词向量
+腾讯在2018年开源了一个包含800多万中文词汇词向量的数据集，在内部任务像对话回复，医疗实体识别等业务应用中取得显著提升，[下载地址](https://ai.tencent.com/ailab/nlp/embedding.html)。训练语料是跨领域的，来自新闻，网页和小说，可以自动发现新词，并且他们自称在覆盖率(“不念僧面念佛面”、“冰火两重天”、“煮酒论英雄”)，新鲜度(“恋与制作人”、“三生三世十里桃花”、“打call”)和准确性(相似词检索结果)上进行了提升。使用了自研的[Directional Skip-Gram (DSG)](https://www.aclweb.org/anthology/N18-2028.pdf)算法进行训练，词向量为200维。
 
 ## 词向量的评估
 
