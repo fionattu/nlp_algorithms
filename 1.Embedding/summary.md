@@ -20,6 +20,9 @@
 ### 腾讯AI实验室开源词向量
 腾讯在2018年开源了一个包含800多万中文词汇词向量的数据集，在内部任务像对话回复，医疗实体识别等业务应用中取得显著提升，[下载地址](https://ai.tencent.com/ailab/nlp/embedding.html)。训练语料是跨领域的，来自新闻，网页和小说，可以自动发现新词，并且他们自称在覆盖率(“不念僧面念佛面”、“冰火两重天”、“煮酒论英雄”)，新鲜度(“恋与制作人”、“三生三世十里桃花”、“打call”)和准确性(相似词检索结果)上进行了提升。使用了自研的[Directional Skip-Gram (DSG)](https://www.aclweb.org/anthology/N18-2028.pdf)算法进行训练，词向量为200维。
 
+### FastText提供157种语言的词向量
+在不同语言维基百科中使用fastText模型训练得到，[下载地址](https://fasttext.cc/docs/en/crawl-vectors.html)。提供二进制bin文件和text文件。text文件可以直接使用词向量，bin文件包含了model parameters，用于继续训练词向量。
+
 ## 词向量的评估
 
 词向量的评估方法分为两种：
