@@ -2,7 +2,7 @@
 
 Mark notes related to **Glove** algorithm:
 
-* Comparison between **Glove** and **word2vec** or **LSA** (matrix factorization). 
+* Comparison between **Glove** and **word2vec** or **LSA(or LDA)** (matrix factorization). 
 * Motivation of Glove.
 * Derivation of Glove.
 
@@ -13,7 +13,7 @@ Glove是由斯坦福著名的nlp公开课cs224n的主讲教授Christopher D. Man
 
 ### Glove vs. LSA (Latent Semantic Analysis)
 
-基于矩阵分解的方法例如LSA(利用SVD)等，统计了不同文本词语的出现次数（或者词语的tfidf值），并且对矩阵进行分解。这种方法考虑了global statitistics(count-based), 可以捕捉到词语的相似性，但是在词类比评估上表现不好，似乎只达到词向量空间的局部最优。而且矩阵分解计算难度大，矩阵本身也很占内存，对于语料的更新训练代价比较高。
+基于矩阵分解的方法例如LSA(利用SVD)等，统计了不同文本词语的出现次数（或者词语的tfidf值），并且对矩阵进行分解。这种方法考虑了global statitistics(count-based), 可以捕捉到词语的相似性，但是在词类比(linear regularities)评估上表现不好，似乎只达到词向量空间的局部最优。而且矩阵分解计算难度大，矩阵本身也很占内存，对于语料的更新训练代价比较高。
 
 * 两者都是基于共现矩阵在操作
 * LSA（Latent Semantic Analysis）可以基于co-occurance matrix构建词向量，实质上是基于全局语料采用SVD进行矩阵分解，然而SVD计算复杂度高

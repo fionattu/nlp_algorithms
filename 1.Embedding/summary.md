@@ -1,16 +1,14 @@
 
 ## Embedding Models
 * <a href="https://github.com/fionattu/nlp_algorithms/blob/master/1.Embedding/word2vec.md" target="_blank" rel="noopener">Word2vec: skipgram, CBOW</a>
-* <a href="https://github.com/fionattu/nlp_algorithms/blob/master/1.Embedding/glove.md" target="_blank" rel="noopener">Glove</a>
+* <a href="https://github.com/fionattu/nlp_algorithms/blob/master/1.Embedding/glove.md" target="_blank" rel="noopener">Glove (Comparisons among SVD, Word2Vec and Glove)</a>
 
-## References
 
-* 腾讯AI实验室词向量
-* 论文精读
-	1. Word2Vec 2013 of Google: [Distributed Representations of Words and Phrases and their Compositionality](https://papers.nips.cc/paper/5021-distributed-representations-of-words-and-phrases-and-their-compositionality.pdf)
-	2. Glove 2014: [GloVe: Global Vectors for Word Representation](https://www.aclweb.org/anthology/D14-1162.pdf) 
-	3. FastText 2016 of Facebook Fair: [Bag of Tricks for Efficient Text Classification](https://arxiv.org/pdf/1607.01759.pdf) 
-	4. DSG 2018 of Tencent AI Lab: [Directional Skip-Gram: Explicitly Distinguishing Left and Right Context for Word Embeddings](https://www.aclweb.org/anthology/N18-2028.pdf)
+## 论文精读
+1. Word2Vec 2013 of Google: [Distributed Representations of Words and Phrases and their Compositionality](https://papers.nips.cc/paper/5021-distributed-representations-of-words-and-phrases-and-their-compositionality.pdf)
+2. Glove 2014: [GloVe: Global Vectors for Word Representation](https://www.aclweb.org/anthology/D14-1162.pdf) 
+3. FastText 2016 of Facebook Fair: [Bag of Tricks for Efficient Text Classification](https://arxiv.org/pdf/1607.01759.pdf) 
+4. DSG 2018 of Tencent AI Lab: [Directional Skip-Gram: Explicitly Distinguishing Left and Right Context for Word Embeddings](https://www.aclweb.org/anthology/N18-2028.pdf)
 
 ## 中文预训练词向量
 
@@ -47,3 +45,6 @@ Extrinsic方法是把词向量输入一些具体的有标注的nlp任务，例�
 
 * 同义词，反义词：出现一个词与同义词的相似度 **<** 其与反义词的相似度，例如：sim(bad, evil) **<** sim(bad, good)。语料来自于google新闻，可推测反义词的上下文会比较像，表示对一件事情的不同观点；相反的，不会用多个同义词来表述同个观点，于是会出现这个情况。
 
+## More
+* SVD方法(LDA, LSA)
+* NNLM

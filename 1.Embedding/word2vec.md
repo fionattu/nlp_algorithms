@@ -2,7 +2,8 @@
 
 Mark notes related to:
 
-* Word2Vec algorithms: Skip-gram and CBOW. 
+* Word2Vec algorithms: skip-gram and CBOW. 
+* Experimental results of skip-gram and CBOW
 * Tricks that proposed to accelerate learning: Negative Sampling, Hierachical Softmax.
 
 注: the terms "word vectors" and "word embeddings" are often used interchangeably.
@@ -19,7 +20,7 @@ word2vec属于自编码无监督学习，语料完全来自于文本，不需要
 其实隐层到输出层也有一个词向量矩阵W'，但一般大家用的是W。或许可以通过拼接或者平均的方法组成词向量，哪个效果好用哪个。
 
 ### Skip-gram
-用中心词预测周围词。一个长度为L的滑动窗口对应2L个训练样例。输入的one-hot encoding中心词位置为1，输出的one-hot encoding周围词对应位置为1。
+用中心词预测周围词。一个长度为L的滑动窗口对应(L-1)个训练样例。输入的one-hot encoding中心词位置为1，输出的one-hot encoding周围词对应位置为1。
 	
 ![image](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/skipgram.png) 
 
@@ -30,6 +31,17 @@ word2vec属于自编码无监督学习，语料完全来自于文本，不需要
 ![image](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/cbow.png)
 	
 目标函数(objective function)和梯度下降的公式推导见<a href="https://github.com/fionattu/nlp_algorithms/blob/master/pics/derivation/w2v.pdf" target="_blank" rel="noopener">w2v公式推导</a>。
+
+## Experimental results of skip-gram and CBOW
+在google最开始提出word2vec的论文*Efficient Estimation of Word Representations in Vector Space*中，实验用google-news对两种模型进行训练，并且**实验预处理只筛选出频率高于某个阈值的100万个单词，因为频率太低的单词训练效果等同于随机指定，没必要评估**。
+
+在包含语法(9种：比较级，最高级，反义词，形容词-副词，过去式，单复数，第三人称动词，正在进行时，国家-国家形容词)和语义(5种：国家-首都，国家-货币，州-城市，城市-国家，性别词)的数据集中进行词类比的评估，如v(‘king’) - v(‘man’) + v(‘woman’)得出的向量，是否和v(‘queen’)的cosine余弦相似度最接近。
+
+最后的实验效果，word2vec两种模型均比之前的NNLM和RNNLM更准确。而**skip-gram的准确性要比CBOW高不少，但skip-gram的训练时间也比CBOW要长**。从模型本身可以分析出现这种结果的原因：
+
+**Skip-gram是用中心词去预测K个周围词，每个滑动窗口要进行K次训练，每次训练输入是中心词，输出是周围词的预测结果，也就是说反向传播会对中心词词向量进行K次调整，这样能更充分利用中心词的上下文信息，一些频率较低的生僻词也能得到较好的训练，但训练次数多，时间也长，复杂度为O(K|V|)**。
+
+**CBOW是用周围词去预测中心词，每个滑动窗口只进行一次前向和反向传播，输入是K个词向量的平均，输出是中心词的预测结果，时间为O(|V|), 比skip-gram更省时。但每次训练因为隐藏层的平均系数，梯度也会分散到各个周围词的词向量，没有专门针对该词的调整，可能导致效果不佳；另外虽然词语也出现在多个滑动窗口(包含前后各N-1长的词，总跨度为2N-2个词，而skip-gram为N)，但跨度太长，可能把一些上下文无关的词语放在一起训练，反而导致效果不好**。
 
 ## Word2Vec Tricks
 
