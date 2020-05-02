@@ -5,9 +5,9 @@ import numpy as np
 from torch.autograd import Variable
 
 sentence = (
-    'Lorem ipsum dolor sit amet consectetur adipisicing elit '
-    'sed do eiusmod tempor incididunt ut labore et dolore magna '
-    'aliqua Ut enim ad minim veniam quis nostrud exercitation'
+    'Long short-term memory is an artificial RNN architecture used in the field of deep learning. '
+    'Unlike standard feedforward neural networks, LSTM has feedback connections. It can not only process '
+    'single data points (such as images), but also entire sequences of data (such as speech or video)'
 )
 
 voc = list(set(sentence.split()))
