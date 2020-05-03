@@ -9,7 +9,7 @@ sentences = ["i like dog", "i like cat", "i like animal",
              "dog cat eyes like", "i like apple", "apple i hate",
              "apple i movie book music like", "cat dog hate", "cat dog like"]
 
-word_sequence = " ".join(sentences).split()
+word_sequence = " ".join([sentences]).split()
 word_list = list(set(word_sequence))
 word_dict = {w: i for i, w in enumerate(word_list)}
 print(word_dict)
