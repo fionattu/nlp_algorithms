@@ -7,7 +7,13 @@ from torch.autograd import Variable
 
 from bilstm_crf import BiLSTM_CRF
 
+torch.manual_seed(1)
 pkl_fname = "data/msra_ner.pkl"
+batch_size = 10  # depends on memory
+n_epoches = 100
+embedding_dim = 100
+hidden_dim = 5
+dtype = torch.FloatTensor
 
 with open(pkl_fname, 'rb') as f:
     word2id = pickle.load(f)
@@ -41,7 +47,7 @@ with open('dataset/vec.txt', 'r') as f:
         word2embeds[char] = embedding
 f.close()
 
-embedding_dim = 100
+
 embeddings = np.zeros((len(word2id), embedding_dim))
 for word, id in word2id.items():
     if word in word2embeds:
@@ -54,24 +60,21 @@ START_TAG = '<START>'
 END_TAG = '<END>'
 tag2id[START_TAG] = len(tag2id)
 tag2id[END_TAG] = len(tag2id)
-batch_size = 10  # depends on memory
-n_epoches = 100
-dtype = torch.FloatTensor
 
 
-def random_batch(x_train, y_train, batch_size):
+def random_batch(embeddings, x_train, y_train, batch_size):
     batch_inputs = []
     batch_output = []
     random_indices = np.random.choice(range(len(x_train)), batch_size, replace=False)
 
     for i in random_indices:
-        batch_inputs.append(x_train[i])
+        batch_inputs.append(embeddings[x_train[i]])
         batch_output.append(y_train[i])
 
     return batch_inputs, batch_output
 
 
-model = BiLSTM_CRF()
+model = BiLSTM_CRF(embedding_dim, hidden_dim, len(id2tag))  # tag_length should not include start/end tags
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
@@ -79,11 +82,11 @@ optimizer = optim.Adam(model.parameters(), lr=0.001)
 for epoch in range(n_epoches):
     optimizer.zero_grad()
 
-    batch_inputs, batch_outputs = random_batch(x_train, y_train, batch_size)
-    batch_inputs = Variable(torch.LongTensor(batch_inputs))
+    batch_inputs, batch_outputs = random_batch(embeddings, x_train, y_train, batch_size)
+    batch_inputs = Variable(torch.FloatTensor(batch_inputs))
     batch_output = Variable(torch.Tensor(batch_outputs))
 
-    outputs = model(batch_inputs)
+    outputs = model.lstm_features(batch_inputs)
     loss = criterion(outputs, batch_output)
 
     loss.backward()
