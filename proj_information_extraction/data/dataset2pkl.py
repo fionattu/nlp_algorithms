@@ -9,6 +9,7 @@ word2tag_fname = "word2tag.txt"
 pkl_fname = "msra_ner.pkl"
 
 # use BME to tag character
+# nr/人名 ns/处所 nt/团体
 line_cnt = 0
 with open(word2tag_fname, 'w') as out:
     with open(msra_dpath + train_fname, 'r') as f:
@@ -115,7 +116,7 @@ def tag_padding(tags):
 
 inputs = [sentence_padding(sentence) for sentence in inputs]
 labels = [tag_padding(label) for label in labels]
-print("finished convert word to id")
+print("finished converting word to id")
 
 # split train, test, validation
 x_train, x_test, y_train, y_test = train_test_split(inputs, labels, test_size=0.2, random_state=43)

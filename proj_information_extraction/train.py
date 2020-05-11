@@ -64,17 +64,20 @@ tag2id[END_TAG] = len(tag2id)
 
 def random_batch(embeddings, x_train, y_train, batch_size):
     batch_inputs = []
-    batch_output = []
+    batch_outputs = []
+    masks = []
+
     random_indices = np.random.choice(range(len(x_train)), batch_size, replace=False)
 
     for i in random_indices:
         batch_inputs.append(embeddings[x_train[i]])
-        batch_output.append(y_train[i])
+        masks.append(np.where(np.array(x_train[i]) > 0, 1, 0))
+        batch_outputs.append(y_train[i])
 
-    return batch_inputs, batch_output
+    return batch_inputs, batch_outputs, masks
 
 
-model = BiLSTM_CRF(embedding_dim, hidden_dim, len(id2tag))  # tag_length should not include start/end tags
+model = BiLSTM_CRF(embedding_dim, hidden_dim, tag2id)  # tag_length should not include start/end tags
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
@@ -82,12 +85,12 @@ optimizer = optim.Adam(model.parameters(), lr=0.001)
 for epoch in range(n_epoches):
     optimizer.zero_grad()
 
-    batch_inputs, batch_outputs = random_batch(embeddings, x_train, y_train, batch_size)
+    batch_inputs, batch_outputs, masks = random_batch(embeddings, x_train, y_train, batch_size)
     batch_inputs = Variable(torch.FloatTensor(batch_inputs))
-    batch_output = Variable(torch.Tensor(batch_outputs))
+    masks = torch.ones((batch_size, 50))
+    batch_output = Variable(torch.LongTensor(batch_outputs))
 
-    outputs = model.lstm_features(batch_inputs)
-    loss = criterion(outputs, batch_output)
+    loss = model.neg_log_likelihood(batch_inputs, batch_output, masks)
 
     loss.backward()
     optimizer.step()
