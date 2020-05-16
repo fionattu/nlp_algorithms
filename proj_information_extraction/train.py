@@ -47,14 +47,12 @@ with open('dataset/vec.txt', 'r') as f:
         word2embeds[char] = embedding
 f.close()
 
-
 embeddings = np.zeros((len(word2id), embedding_dim))
 for word, id in word2id.items():
     if word in word2embeds:
         embeddings[id] = word2embeds[word]
     else:
         print('no embedding: {}'.format(word))
-
 
 START_TAG = '<START>'
 END_TAG = '<END>'
@@ -77,18 +75,18 @@ def random_batch(embeddings, x_train, y_train, batch_size):
     return batch_inputs, batch_outputs, masks
 
 
-model = BiLSTM_CRF(embedding_dim, hidden_dim, tag2id)  # tag_length should not include start/end tags
+# tag_length should not include start/end tags
+model = BiLSTM_CRF(embedding_dim, hidden_dim, tag2id, START_TAG, END_TAG)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
-
 
 for epoch in range(n_epoches):
     optimizer.zero_grad()
 
     batch_inputs, batch_outputs, masks = random_batch(embeddings, x_train, y_train, batch_size)
     batch_inputs = Variable(torch.FloatTensor(batch_inputs))
-    masks = torch.ones((batch_size, 50))
     batch_output = Variable(torch.LongTensor(batch_outputs))
+    masks = Variable(torch.IntTensor(masks))
 
     loss = model.neg_log_likelihood(batch_inputs, batch_output, masks)
 
