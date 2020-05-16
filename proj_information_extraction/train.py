@@ -88,6 +88,7 @@ for epoch in range(n_epoches):
     batch_output = Variable(torch.LongTensor(batch_outputs))
     masks = Variable(torch.IntTensor(masks))
 
+    scores, tags = model(batch_inputs, masks)
     loss = model.neg_log_likelihood(batch_inputs, batch_output, masks)
 
     loss.backward()

@@ -105,9 +105,9 @@ class BiLSTM_CRF(nn.Module):
             # [batch_size, n_tags]
             alphas = new_alphas * is_valid + alphas * (1 - is_valid)
 
-        alphas += self.transitions[:, self.tag2id[self.END_TAG]]
+        scores += self.transitions[:, self.tag2id[self.END_TAG]]
 
-        return torch.logsumexp(alphas, dim=1)
+        return torch.logsumexp(scores, dim=1)
 
     def neg_log_likelihood(self, X, tags, masks):
         """Return NLL as the loss"""
@@ -115,6 +115,67 @@ class BiLSTM_CRF(nn.Module):
         sentence_score = self._compute_sentence_score(emissions, tags, masks)
         log_partition = self._compute_log_partition(emissions, masks)
         return log_partition - sentence_score
+
+    def _find_best_path(self, batch, back_track, end_tag):
+        return torch.randn(2, 3)
+
+    def _viterbi_decode(self, emissions, masks):
+        """
+        :param emissions: [seq_len, batch_size, nb_labels]
+        :param masks: [batch_size, seq_len]
+        :return:
+        """
+        seq_len, batch_size, n_tags = emissions.shape
+        emissions = emissions.transpose(0, 1)
+
+        # [batch_size, n_tags]
+        alphas = emissions[:, 0] + self.transitions[self.tag2id[self.START_TAG], :]
+        back_track_tags = []
+
+        for i in range(1, seq_len):
+            e_scores = emissions[:, i].unsqueeze(1)
+            t_scores = self.transitions.unsqueeze(0)
+            a_scores = alphas.unsqueeze(2)
+
+            scores = e_scores + t_scores + a_scores
+
+            # max_scores = [batch_size, n_tags]
+            # max_scores_tags = [batch_size, n_tags]
+            # max_score_tags find the best tags of last time step given the tags of current step
+            max_scores, max_score_tags = torch.max(scores, dim=1)
+
+            is_valid = masks[:, i].unsqueeze(1)
+            alphas = max_scores * is_valid + alphas * (1 - is_valid)
+            back_track_tags.append(max_score_tags)
+
+        scores = alphas + self.transitions[:, self.tag2id[self.END_TAG]]
+        max_end_scores, max_end_score_tags = torch.max(scores, dim=1)
+
+        best_sequences = []
+        valid_end_index = torch.sum(masks, dim=1) - 1  # [batch_size]
+        for i in range(batch_size):
+            valid_len_val = valid_end_index[i].item()
+
+            back_tracks = back_track_tags[:valid_len_val] # [valid_len_val, batch_size, n_tags]
+
+            end_tag = max_end_score_tags[i].item()
+
+            best_sequence = self._find_best_path(i, back_tracks, end_tag)
+
+            best_sequences.append(best_sequence)
+            print()
+
+        print()
+
+        return None, None
+
+    def forward(self, X, masks):
+        """Predict the best path after training"""
+
+        # [seq_len, batch_size, nb_labels]
+        emissions = self._lstm_features(X)
+        scores, sequences = self._viterbi_decode(emissions, masks)
+        return scores, sequences
 
 
 
