@@ -9,8 +9,8 @@ from bilstm_crf import BiLSTM_CRF
 
 torch.manual_seed(1)
 pkl_fname = "data/msra_ner.pkl"
-batch_size = 10  # depends on memory
-n_epoches = 100
+batch_size = 50  # depends on memory
+n_epoches = 1000
 embedding_dim = 100
 hidden_dim = 5
 dtype = torch.FloatTensor
@@ -56,6 +56,7 @@ for word, id in word2id.items():
 
 START_TAG = '<START>'
 END_TAG = '<END>'
+# PAD_TAG = '<PAD>'
 tag2id[START_TAG] = len(tag2id)
 tag2id[END_TAG] = len(tag2id)
 
@@ -77,22 +78,28 @@ def random_batch(embeddings, x_train, y_train, batch_size):
 
 # tag_length should not include start/end tags
 model = BiLSTM_CRF(embedding_dim, hidden_dim, tag2id, START_TAG, END_TAG)
-criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 for epoch in range(n_epoches):
-    optimizer.zero_grad()
+    optimizer.zero_grad()  # or model.zero_grad() since all model parameters are in optimizer
 
     batch_inputs, batch_outputs, masks = random_batch(embeddings, x_train, y_train, batch_size)
     batch_inputs = Variable(torch.FloatTensor(batch_inputs))
     batch_output = Variable(torch.LongTensor(batch_outputs))
     masks = Variable(torch.IntTensor(masks))
 
-    scores, tags = model(batch_inputs, masks)
     loss = model.neg_log_likelihood(batch_inputs, batch_output, masks)
 
     loss.backward()
     optimizer.step()
 
     if (epoch + 1) % 10 == 0:
-        print('Epoch: {:04d}'.format(epoch))
+        print('Epoch: {:04d}, loss: {:.4f}'.format(epoch, loss))
+
+# predictions after training
+batch_inputs, batch_outputs, masks = random_batch(embeddings, x_train, y_train, batch_size)
+batch_inputs = Variable(torch.FloatTensor(batch_inputs))
+batch_output = Variable(torch.LongTensor(batch_outputs))
+masks = Variable(torch.IntTensor(masks))
+scores, sequences = model(batch_inputs, masks)
+
