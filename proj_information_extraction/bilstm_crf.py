@@ -1,10 +1,7 @@
 import torch.nn as nn
 import torch
 from torch.autograd import Variable
-
-
-# START_TAG = '<START>'
-# END_TAG = '<END>'
+from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 
 class BiLSTM_CRF(nn.Module):
@@ -18,24 +15,34 @@ class BiLSTM_CRF(nn.Module):
         self.START_TAG = start_tag
         self.END_TAG = end_tag
 
-        self.lstm = nn.LSTM(input_size=n_embedding, hidden_size=n_hidden, bidirectional=True)
+        self.lstm = nn.LSTM(input_size=n_embedding, hidden_size=n_hidden, bidirectional=True, batch_first=True)
         self.hidden2tag = nn.Linear(n_hidden * 2, self.n_tags, bias=True)
 
         self.transitions = nn.Parameter(torch.randn(self.n_tags, self.n_tags))
         self.transitions.data[:, tag2id[self.START_TAG]] = -10000
         self.transitions.data[tag2id[self.END_TAG], :] = -10000
 
-    def _lstm_features(self, X):  # X =  consider padding input
+    def _lstm_features(self, X, length):
         """Get lstm features after the fully-connected layer
 
         :param X: [batch_size, seq_len, n_embedding]
+        :param length: [batch_size]
         :return: [seq_len, batch_size, n_tags]
         """
-        X = X.transpose(0, 1)  # X = [seq_len, batch_size, n_embedding]
-        hidden_state = Variable(torch.zeros(1 * 2, list(X.size())[1], self.n_hidden))
-        cell_state = Variable(torch.zeros(1 * 2, list(X.size())[1], self.n_hidden))
-        lstm_out, (_, _) = self.lstm(X, (hidden_state, cell_state))  # [seq_len, batch, num_directions * hidden_size]
-        emissions = self.hidden2tag(lstm_out)
+
+        batch_size = X.shape[0]
+
+        # [seq_len, batch_size, n_embedding]
+        X = X.transpose(0, 1)
+        X = pack_padded_sequence(X, length)
+
+        hidden_state = Variable(torch.zeros(1 * 2, batch_size, self.n_hidden))
+        cell_state = Variable(torch.zeros(1 * 2, batch_size, self.n_hidden))
+
+        # [seq_len, batch, num_directions * hidden_size]
+        lstm_out, (_, _) = self.lstm(X, (hidden_state, cell_state))
+        outputs, length = pad_packed_sequence(lstm_out)
+        emissions = self.hidden2tag(outputs)
         return emissions
 
     def _compute_sentence_score(self, emissions, tags, masks):
@@ -46,12 +53,13 @@ class BiLSTM_CRF(nn.Module):
         :param masks: [batch_size, seq_len]
         :return: [batch_size]
         """
-        emissions = emissions.transpose(0, 1)  # emissions = [batch_size, seq_len, n_tags]
-        batch_size, seq_len = tags.shape
+        # emissions = [batch_size, seq_len, n_tags]
+        emissions = emissions.transpose(0, 1)
+        batch_size, seq_len, _ = emissions.shape
         scores = torch.zeros(batch_size)
         first_tags = tags[:, 0]
         t_scores = self.transitions[self.tag2id[self.START_TAG], first_tags]
-        # emissions[:, 0] = [batch_size, n_tags] pytorch remove 0 dimension automatically
+        # emissions[:, 0] = [batch_size, n_tags] as pytorch remove 1-dimension automatically
         e_scores = (emissions[:, 0].gather(1, tags[:, 0].unsqueeze(1))).squeeze()
         scores += (e_scores + t_scores)
 
@@ -61,7 +69,8 @@ class BiLSTM_CRF(nn.Module):
             e_scores = emissions[:, i].gather(1, tags[:, i].unsqueeze(1)).squeeze()
             scores += (e_scores + t_scores) * is_valid
 
-        last_valid_idx = torch.sum(masks.type(torch.IntTensor), 1) - 1  # dim=1: sum across columns
+        # dim=1: sum across columns
+        last_valid_idx = torch.sum(masks.type(torch.IntTensor), 1) - 1
         last_tags = tags.gather(1, last_valid_idx.unsqueeze(1)).squeeze()
         scores += self.transitions[last_tags, self.tag2id[self.END_TAG]]
         return scores
@@ -109,9 +118,9 @@ class BiLSTM_CRF(nn.Module):
 
         return torch.logsumexp(scores, dim=1)
 
-    def neg_log_likelihood(self, X, tags, masks):
+    def neg_log_likelihood(self, X, tags, masks, length):
         """Return NLL as the loss"""
-        emissions = self._lstm_features(X)
+        emissions = self._lstm_features(X, length)
         sentence_score = self._compute_sentence_score(emissions, tags, masks)
         log_partition = self._compute_log_partition(emissions, masks)
         return torch.sum(log_partition - sentence_score)  # loss can only be one-dim tensor
@@ -170,7 +179,9 @@ class BiLSTM_CRF(nn.Module):
         max_end_scores, max_end_score_tags = torch.max(scores, dim=1)
 
         best_sequences = []
-        valid_end_index = torch.sum(masks, dim=1) - 1  # [batch_size]
+
+        # [batch_size]
+        valid_end_index = torch.sum(masks, dim=1) - 1
         for i in range(batch_size):
             valid_len_val = valid_end_index[i].item()
 
@@ -185,10 +196,10 @@ class BiLSTM_CRF(nn.Module):
 
         return max_end_scores, best_sequences
 
-    def forward(self, X, masks):
+    def forward(self, X, masks, length):
         """Predict the best sequence after training"""
 
         # [seq_len, batch_size, nb_labels]
-        emissions = self._lstm_features(X)
+        emissions = self._lstm_features(X, length)
         scores, sequences = self._viterbi_decode(emissions, masks)
         return scores, sequences

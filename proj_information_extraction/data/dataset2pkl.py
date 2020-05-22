@@ -1,7 +1,7 @@
 # -*-coding:utf-8 -*-
 import re
 import pickle
-from sklearn.model_selection import train_test_split
+import random
 
 msra_dpath = "../dataset/MSRA/"
 train_fname = "train1.txt"
@@ -63,8 +63,7 @@ id2tag = {0: '',
           9: 'E_ns',
           10: 'o'}
 
-inputs = []
-labels = []
+inputs_dict = {}
 
 # tag to id
 with open('word2tag.txt', 'r') as f:
@@ -80,14 +79,16 @@ with open('word2tag.txt', 'r') as f:
                 sen_label.append(tag2id[label])
                 if not has_ner and label != 'o':
                     has_ner = True
-            if has_ner:  # only train sentence with named entity
-                inputs.append(sen_input)
-                labels.append(sen_label)
+            # only train sentence with named entity
+            if has_ner:
+                inputs_dict[' '.join(sen_input)] = sen_label
+                # inputs.append(sen_input)
+                # labels.append(sen_label)
 f.close()
 print("finished convert tag to id")
 
 # word to id
-word_corpus = list(set([word for sentence in inputs for word in sentence]))
+word_corpus = list(set([word for sentence in inputs_dict for word in sentence]))
 word2id = {w: i + 1 for i, w in enumerate(word_corpus)}
 word2id['unk'] = len(word2id) + 1
 word2id['pad'] = 0
@@ -114,14 +115,32 @@ def tag_padding(tags):
     return tags
 
 
-inputs = [sentence_padding(sentence) for sentence in inputs]
-labels = [tag_padding(label) for label in labels]
+def train_test_split(inputs, labels, test_percentage):
+    test_size = int(len(inputs) * test_percentage)
+    test_index = [random.randint(0, test_size) for _ in range(test_size)]
+    x_train, x_test, y_train, y_test = [], [], [], []
+    for i, v in enumerate(inputs):
+        if i in test_index:
+            x_test.append(v)
+            y_test.append(labels[i])
+        else:
+            x_train.append(v)
+            y_train.append(labels[i])
+    return x_train, x_test, y_train, y_test
+
+
+inputs_keys = list(inputs_dict.keys())
+inputs_keys.sort(key=len, reverse=True)
+sorted_labels = [inputs_dict[x] for x in inputs_keys]
+sorted_inputs = [x.split() for x in inputs_keys]
+inputs = [sentence_padding(sentence) for sentence in sorted_inputs]
+labels = [tag_padding(label) for label in sorted_labels]
 print("finished converting word to id")
 
 # split train, test, validation
-x_train, x_test, y_train, y_test = train_test_split(inputs, labels, test_size=0.2, random_state=43)
-x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, test_size=0.1, random_state=43)
-print("split train, test, validation")
+x_train, x_test, y_train, y_test = train_test_split(inputs, labels, 0.2)
+x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, 0.1)
+print("finished splitting train, test, validation")
 
 # pickle serialization use binary protocol by default
 with open(pkl_fname, 'wb') as outp:

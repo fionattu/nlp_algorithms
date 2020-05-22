@@ -1,7 +1,6 @@
 import pickle
 import numpy as np
 import torch
-import torch.nn as nn
 from torch import optim
 from torch.autograd import Variable
 
@@ -65,15 +64,17 @@ def random_batch(embeddings, x_train, y_train, batch_size):
     batch_inputs = []
     batch_outputs = []
     masks = []
+    length = []
 
     random_indices = np.random.choice(range(len(x_train)), batch_size, replace=False)
-
+    random_indices = np.sort(random_indices)
     for i in random_indices:
         batch_inputs.append(embeddings[x_train[i]])
         masks.append(np.where(np.array(x_train[i]) > 0, 1, 0))
+        length.append(masks[-1].sum())
         batch_outputs.append(y_train[i])
 
-    return batch_inputs, batch_outputs, masks
+    return batch_inputs, batch_outputs, masks, length
 
 
 # tag_length should not include start/end tags
@@ -83,12 +84,13 @@ optimizer = optim.Adam(model.parameters(), lr=0.001)
 for epoch in range(n_epoches):
     optimizer.zero_grad()  # or model.zero_grad() since all model parameters are in optimizer
 
-    batch_inputs, batch_outputs, masks = random_batch(embeddings, x_train, y_train, batch_size)
+    batch_inputs, batch_outputs, masks, length = random_batch(embeddings, x_train, y_train, batch_size)
     batch_inputs = Variable(torch.FloatTensor(batch_inputs))
     batch_output = Variable(torch.LongTensor(batch_outputs))
     masks = Variable(torch.IntTensor(masks))
+    length = torch.LongTensor(length)
 
-    loss = model.neg_log_likelihood(batch_inputs, batch_output, masks)
+    loss = model.neg_log_likelihood(batch_inputs, batch_output, masks, length)
 
     loss.backward()
     optimizer.step()
@@ -96,10 +98,12 @@ for epoch in range(n_epoches):
     if (epoch + 1) % 10 == 0:
         print('Epoch: {:04d}, loss: {:.4f}'.format(epoch, loss))
 
+
 # predictions after training
-batch_inputs, batch_outputs, masks = random_batch(embeddings, x_train, y_train, batch_size)
+batch_inputs, batch_outputs, masks, length = random_batch(embeddings, x_train, y_train, batch_size)
 batch_inputs = Variable(torch.FloatTensor(batch_inputs))
 batch_output = Variable(torch.LongTensor(batch_outputs))
 masks = Variable(torch.IntTensor(masks))
-scores, sequences = model(batch_inputs, masks)
+length = torch.LongTensor(length)
+scores, sequences = model(batch_inputs, masks, length)
 
