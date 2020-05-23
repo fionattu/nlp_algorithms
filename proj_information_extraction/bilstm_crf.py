@@ -142,7 +142,7 @@ class BiLSTM_CRF(nn.Module):
 
         best_sequence = [end_tag]
         prev_tag = end_tag
-        for i in reversed(range(1, seq_len)):
+        for i in reversed(range(0, seq_len)):
             prev_tag = back_track[i][batch, prev_tag].item()
             best_sequence.append(prev_tag)
 
