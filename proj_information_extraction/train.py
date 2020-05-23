@@ -8,8 +8,9 @@ from bilstm_crf import BiLSTM_CRF
 
 torch.manual_seed(1)
 pkl_fname = "data/msra_ner.pkl"
-batch_size = 50  # depends on memory
-n_epoches = 1000
+# depends on memory
+batch_size = 50
+n_epoches = 2000
 embedding_dim = 100
 hidden_dim = 5
 dtype = torch.FloatTensor
@@ -46,12 +47,13 @@ with open('dataset/vec.txt', 'r') as f:
         word2embeds[char] = embedding
 f.close()
 
-embeddings = np.zeros((len(word2id), embedding_dim))
+# oov use random embedding "for each" but not zeros
+embeddings = np.random.normal(0, 0.1, (len(word2id), embedding_dim))
 for word, id in word2id.items():
     if word in word2embeds:
         embeddings[id] = word2embeds[word]
     else:
-        print('no embedding: {}'.format(word))
+        print('no embedding: {}， use random embedding'.format(word))
 
 START_TAG = '<START>'
 END_TAG = '<END>'
@@ -82,7 +84,8 @@ model = BiLSTM_CRF(embedding_dim, hidden_dim, tag2id, START_TAG, END_TAG)
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 for epoch in range(n_epoches):
-    optimizer.zero_grad()  # or model.zero_grad() since all model parameters are in optimizer
+    # or model.zero_grad() since all model parameters are in optimizer
+    optimizer.zero_grad()
 
     batch_inputs, batch_outputs, masks, length = random_batch(embeddings, x_train, y_train, batch_size)
     batch_inputs = Variable(torch.FloatTensor(batch_inputs))

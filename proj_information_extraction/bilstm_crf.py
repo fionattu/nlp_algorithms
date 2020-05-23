@@ -53,6 +53,7 @@ class BiLSTM_CRF(nn.Module):
         :param masks: [batch_size, seq_len]
         :return: [batch_size]
         """
+
         # emissions = [batch_size, seq_len, n_tags]
         emissions = emissions.transpose(0, 1)
         batch_size, seq_len, _ = emissions.shape
@@ -82,6 +83,7 @@ class BiLSTM_CRF(nn.Module):
         :param masks: [batch_size, seq_len]
         :return: [batch_size]
         """
+
         seq_len, batch_size, n_tags = emissions.shape
 
         # [batch_size, seq_len, n_tags]
@@ -98,7 +100,7 @@ class BiLSTM_CRF(nn.Module):
             t_scores = self.transitions.unsqueeze(0)
 
             # [batch_size, n_tags] -> [batch_size, 1, n_tags]
-            a_scores = alphas.unsqueeze(1)
+            a_scores = alphas.unsqueeze(2)
 
             # [batch_size, n_tags, n_tags]
             scores = e_scores + t_scores + a_scores
@@ -120,10 +122,13 @@ class BiLSTM_CRF(nn.Module):
 
     def neg_log_likelihood(self, X, tags, masks, length):
         """Return NLL as the loss"""
+
         emissions = self._lstm_features(X, length)
         sentence_score = self._compute_sentence_score(emissions, tags, masks)
         log_partition = self._compute_log_partition(emissions, masks)
-        return torch.sum(log_partition - sentence_score)  # loss can only be one-dim tensor
+
+        # loss can only be one-dim tensor
+        return torch.sum(log_partition - sentence_score)
 
     def _find_best_sequence(self, batch, back_track, end_tag):
         """
@@ -132,6 +137,7 @@ class BiLSTM_CRF(nn.Module):
         :param end_tag: best end tag of current batch
         :return: sequence of best tags
         """
+
         seq_len = len(back_track)
 
         best_sequence = [end_tag]
@@ -149,6 +155,7 @@ class BiLSTM_CRF(nn.Module):
         :param masks: [batch_size, seq_len]
         :return:
         """
+
         seq_len, batch_size, n_tags = emissions.shape
         emissions = emissions.transpose(0, 1)
 
