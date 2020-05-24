@@ -2,11 +2,14 @@
 import re
 import pickle
 import random
+import numpy as np
+from constants import Consts
 
 msra_dpath = "../dataset/MSRA/"
 train_fname = "train1.txt"
 word2tag_fname = "word2tag.txt"
 pkl_fname = "msra_ner.pkl"
+embedding_fname = '../dataset/vec.txt'
 
 # use BME to tag character
 # nr/人名 ns/处所 nt/团体
@@ -85,7 +88,7 @@ with open('word2tag.txt', 'r') as f:
                 # inputs.append(sen_input)
                 # labels.append(sen_label)
 f.close()
-print("finished convert tag to id")
+print("finished converting tag to id")
 
 # word to id
 word_corpus = list(set([word for sentence in inputs_dict for word in sentence]))
@@ -95,23 +98,27 @@ word2id['pad'] = 0
 id2word = {i + 1: w for i, w in enumerate(word_corpus)}
 id2word[len(id2word) + 1] = 'unk'
 id2word[0] = 'pad'
-max_len = 50
+
+tag2id[Consts.START_TAG] = len(tag2id)
+tag2id[Consts.END_TAG] = len(tag2id)
+id2tag[len(id2tag)] = Consts.START_TAG
+id2tag[len(id2tag)] = Consts.END_TAG
 
 
 def sentence_padding(sentence):
-    """把 sentences 转为 word_ids 形式，并自动补全位 max_len 长度。"""
+    """把 sentences 转为 word_ids 形式，并自动补全位 Consts.max_len 长度。"""
     ids = [word2id[w] for w in sentence]
-    if len(ids) >= max_len:  # 长则弃掉
-        return ids[:max_len]
-    ids.extend([0] * (max_len - len(ids)))  # 短则补全
+    if len(ids) >= Consts.MAX_LEN:  # 长则弃掉
+        return ids[:Consts.MAX_LEN]
+    ids.extend([0] * (Consts.MAX_LEN - len(ids)))  # 短则补全
     return ids
 
 
 def tag_padding(tags):
-    """把 tags 转为 id 形式， 并自动补全位 max_len 长度。"""
-    if len(tags) >= max_len:  # 长则弃掉
-        return tags[:max_len]
-    tags.extend([0] * (max_len - len(tags)))  # 短则补全
+    """把 tags 转为 id 形式， 并自动补全位 Consts.max_len 长度。"""
+    if len(tags) >= Consts.MAX_LEN:  # 长则弃掉
+        return tags[:Consts.MAX_LEN]
+    tags.extend([0] * (Consts.MAX_LEN - len(tags)))  # 短则补全
     return tags
 
 
@@ -142,6 +149,25 @@ x_train, x_test, y_train, y_test = train_test_split(inputs, labels, 0.2)
 x_train, x_valid, y_train, y_valid = train_test_split(x_train, y_train, 0.1)
 print("finished splitting train, test, validation")
 
+# load char-embedding
+word2embeds = {}
+with open(embedding_fname, 'r') as f:
+    for line in f:
+        char = line[0]
+        embedding = line.replace(line[0], '').strip().split()
+        word2embeds[char] = embedding
+f.close()
+
+# build word2vec
+# oov use random embedding "for each" but not zeros
+embedding_dim = 100
+embeddings = np.random.normal(0, 0.1, (len(word2id), embedding_dim))
+for word, id in word2id.items():
+    if word in word2embeds:
+        embeddings[id] = word2embeds[word]
+    else:
+        print('no embedding: {}， use random embedding'.format(word))
+
 # pickle serialization use binary protocol by default
 with open(pkl_fname, 'wb') as outp:
     pickle.dump(word2id, outp)
@@ -154,4 +180,5 @@ with open(pkl_fname, 'wb') as outp:
     pickle.dump(y_test, outp)
     pickle.dump(x_valid, outp)
     pickle.dump(y_valid, outp)
+    pickle.dump(embeddings, outp)
 print("finished saving to {}".format(pkl_fname))
