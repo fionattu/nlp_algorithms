@@ -2,6 +2,7 @@ import pickle
 import numpy as np
 import torch
 import math
+import time
 from torch import optim
 from torch.autograd import Variable
 
@@ -106,12 +107,12 @@ def get_f1(model, test=True):
     else:
         x, y = x_valid, y_valid
 
-    n_batch = math.ceil(len(x) / (Consts.BATCH_SIZE * 4))
+    n_batch = math.ceil(len(x) / Consts.BATCH_SIZE)
     entity_pred, entity_true = [], []
 
     for i in range(n_batch):
-        start = i * Consts.BATCH_SIZE * 4
-        end = (i + 1) * Consts.BATCH_SIZE * 4 if i != (n_batch - 1) else len(x)
+        start = i * Consts.BATCH_SIZE
+        end = (i + 1) * Consts.BATCH_SIZE if i != (n_batch - 1) else len(x)
         batch_ids, batch_inputs, batch_outputs, masks, length = random_batch(embeddings,
                                                                              x[start:end],
                                                                              y[start:end],
@@ -126,17 +127,21 @@ def get_f1(model, test=True):
     recall = float(len(union)) / len(entity_true)
     f1_score = 2 * precision * recall / (precision + recall) if len(union) != 0 else 0.0
 
-    return entity_pred, f1_score
+    return entity_pred, f1_score, precision, recall
 
 
 def train():
     # tag_length should not include start/end tags
     model = BiLSTM_CRF(Consts.EMBEDDING_DIM, Consts.HIDDEN_DIM, tag2id, Consts.START_TAG, Consts.END_TAG)
     optimizer = optim.Adam(model.parameters(), lr=0.001)
+    # f1 score of validation dataset
     valid_f1 = -1000
-
+    stop = False
+    start_t = time.time()
     for epoch in range(Consts.N_EPOCH):
         # or model.zero_grad() since all model parameters are in optimizer
+        if stop:
+            break
         optimizer.zero_grad()
 
         _, batch_inputs, batch_outputs, masks, length = random_batch(embeddings, x_train, y_train, Consts.BATCH_SIZE)
@@ -147,9 +152,12 @@ def train():
         optimizer.step()
 
         if (epoch + 1) % 300 == 0:
-            print('Epoch: {:04d}, loss: {:.4f}'.format(epoch, loss))
-            entities, new_valid_f1 = get_f1(model, test=False)
-            print('f1 score from {:.6f} to {:.6f}'.format(valid_f1, new_valid_f1))
+            print('Epoch: {:04d}, loss: {:.4f}, seconds: {:.4f}'.format(epoch, loss, time.time() - start_t))
+            entities, new_valid_f1, prec, recall = get_f1(model, test=False)
+            print('[Validation]f1 score from {:.6f} to {:.6f}'.format(valid_f1, new_valid_f1))
+            print('[Validation]precision: {}, recall: {}\n'.format(prec, recall))
+            if epoch > 3000 and (abs(new_valid_f1 - valid_f1) < 0.001 or new_valid_f1 < valid_f1):
+                stop = True
             if new_valid_f1 > valid_f1:
                 valid_f1 = new_valid_f1
 
@@ -158,5 +166,6 @@ def train():
 
 if __name__ == '__main__':
     train()
-    # get_f1("", test=True)
+    entities, new_valid_f1, prec, recall = get_f1("", test=True)
+    print("[Test]f1 score: {:.6f}, precision: {}, recall: {}".format(new_valid_f1, prec, recall))
 
