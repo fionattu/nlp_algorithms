@@ -193,6 +193,31 @@ Multi-head Attention确实能给模型带来性能的提升。通过查阅资料
 
 ### BERT
 
+Bert的提出使得nlp 11种任务达到突破。基于深度的双向transformer原理，采用预训练+微调的思想 (pre-training and fine-tuning)。
+
+**双向transformer**：
+
+* 区分于GPT和ELMO的特点，好处在哪里呢？
+
+**预训练两个子任务**：
+
+* MLM (Masked Language Model)
+
+* NSP (Next Sentence Prediction) 
+
+**其他要注意的细节**：
+
+* 输入embedding
+
+* "[CLS]"和"[SEP]"
+
+* Bert具备两种不同大小的模型
+
+	* BERTBASE (L=12, H=768, A=12, Total Parameters=110M) 
+	* BERTLARGE (L=24, H=1024, A=16, Total Parameters=340M).
+
+**下游任务的微调方法**：
+
 ## 论文精读
 
 * TagLM: Semi-supervised sequence tagging with bidirectional language models
