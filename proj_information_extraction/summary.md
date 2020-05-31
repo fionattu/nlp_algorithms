@@ -25,17 +25,24 @@
 # 深度学习方法
 
 ## RNN-CRF
-现在bilstm+CRF为公认的表现最好的模型。具体参考百度论文。
+现在bilstm_crf为公认的表现最好的模型，由百度在2015年提出。
+[Bidirectional LSTM-CRF Models for Sequence Tagging](https://github.com/fionattu/nlp_algorithms/blob/master/proj_information_extraction/papers/baidu15_bilstm_crf.pdf)。
 
-1. 动态规划求所有路径和
+主要难点：
+1. 动态规划求所有路径分数(分母)
 2. 维特比解码求出最优路径
 
 
-基于预训练bert词向量的bilstm-crf模型
+提升: 基于预训练bert词向量的bilstm-crf模型
 
 ## CNN-CRF
 
 # 近期前沿技术
+需要了解的方法：
+
+* ELMO 
+* GPT 
+* Bert
 
 ## Attention
 ## Transfer Learning
