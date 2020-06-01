@@ -194,11 +194,13 @@ Multi-head Attention确实能给模型带来性能的提升。通过查阅资料
 * 位置编码的理解
 * multi-head的作用
 * layernorm的作用
-* scaled dot product attention
 * ffnn：每个encoder/decoder的不同timestep共享参数，但不同的encoder/decoder参数独立。
 * Adam optimizer的设置(加入warmup)
 * Regularization: residual dropouts和label smoothing
 * 模型结构深入理解：[The Annotated Transformer](http://nlp.seas.harvard.edu/2018/04/03/attention.html)
+* soft attention (weighted attention score) vs. hard attention (max attention score) 
+* multiplicative attention (space-effient) vs. additive attention (additive has better performance when dk becomes larger, similar performance when dk is small, https://arxiv.org/abs/1703.03906)
+* why scaled dot product attention: https://www.zhihu.com/question/339723385
 
 
 ### GPT
