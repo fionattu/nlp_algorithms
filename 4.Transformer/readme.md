@@ -189,6 +189,18 @@ Multi-head Attention确实能给模型带来性能的提升。通过查阅资料
 
 ![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/en_decoder_attention.png)
 
+### 一些还要注意的点：
+
+* 位置编码的理解
+* multi-head的作用
+* layernorm的作用
+* scaled dot product attention
+* ffnn：每个encoder/decoder的不同timestep共享参数，但不同的encoder/decoder参数独立。
+* Adam optimizer的设置(加入warmup)
+* Regularization: residual dropouts和label smoothing
+* 模型结构深入理解：[The Annotated Transformer](http://nlp.seas.harvard.edu/2018/04/03/attention.html)
+
+
 ### GPT
 
 ### BERT
