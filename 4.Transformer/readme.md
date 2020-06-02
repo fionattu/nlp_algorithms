@@ -191,16 +191,31 @@ Multi-head Attention确实能给模型带来性能的提升。通过查阅资料
 
 ### 一些还要注意的点：
 
-* 位置编码的理解
-* multi-head的作用
-* layernorm的作用
-* ffnn：每个encoder/decoder的不同timestep共享参数，但不同的encoder/decoder参数独立。
+**Layernorm的作用**: ln ([layernorm](https://zhuanlan.zhihu.com/p/54530247))是对一个样本的所有特征进行归一化。如下图，将残差X和attention网络输出Z相加后得到一个2x4的张量，然后对这8个值进行归一化。
+
+这里提一下ln和bn ([batchnorm](https://zhuanlan.zhihu.com/p/54171297))的不同。bn是沿着batch的方向，对同一个特征进行归一化。由于对同一个特征进行操作，bn比ln更好理解，bn在batch较大，即样本数较多时，取得的效果(loss)要优于ln；但是当样本数较小时，例如rnn的输入序列长短相差较多时，在后面的timestep样本已经比较少，导致bn失去全局统计的优势，效果要比ln差。
+
+
+ln和bn归一化的流程如下图。由于改变了特征的分布，最后需要对归一化后的数值进行进一步处理。
+ 
+![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/layernorm.png)
+
+* multi-head的作用 (https://www.zhihu.com/question/341222779/answer/814111138)
+
+**ffnn**：每个encoder/decoder的不同timestep共享参数，但不同的encoder/decoder参数独立。
+
+**multiplicative attention (space-effient) vs. additive attention**: 作者在文中指出，使用乘法注意力机制比加法注意力在实践中更快，更节省空间。
+
+ (additive has better performance when dk becomes larger, similar performance when dk is small, https://arxiv.org/abs/1703.03906)
+
+* soft attention (weighted attention score) vs. hard attention (max attention score) 
+
+* why scaled dot product attention: https://www.zhihu.com/question/339723385
 * Adam optimizer的设置(加入warmup)
 * Regularization: residual dropouts和label smoothing
+* 位置编码的理解
 * 模型结构深入理解：[The Annotated Transformer](http://nlp.seas.harvard.edu/2018/04/03/attention.html)
-* soft attention (weighted attention score) vs. hard attention (max attention score) 
-* multiplicative attention (space-effient) vs. additive attention (additive has better performance when dk becomes larger, similar performance when dk is small, https://arxiv.org/abs/1703.03906)
-* why scaled dot product attention: https://www.zhihu.com/question/339723385
+
 
 
 ### GPT
