@@ -189,28 +189,37 @@ Multi-head Attention确实能给模型带来性能的提升。通过查阅资料
 
 ![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/en_decoder_attention.png)
 
-### 一些还要注意的点：
+### 一些还要注意的细节：
+
+**ffnn**：每个encoder/decoder的不同timestep共享参数，但不同的encoder/decoder参数独立。
 
 **Layernorm的作用**: ln ([layernorm](https://zhuanlan.zhihu.com/p/54530247))是对一个样本的所有特征进行归一化。如下图，将残差X和attention网络输出Z相加后得到一个2x4的张量，然后对这8个值进行归一化。
+
+![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/layernorm.png)
 
 这里提一下ln和bn ([batchnorm](https://zhuanlan.zhihu.com/p/54171297))的不同。bn是沿着batch的方向，对同一个特征进行归一化。由于对同一个特征进行操作，bn比ln更好理解，bn在batch较大，即样本数较多时，取得的效果(loss)要优于ln；但是当样本数较小时，例如rnn的输入序列长短相差较多时，在后面的timestep样本已经比较少，导致bn失去全局统计的优势，效果要比ln差。
 
 
 ln和bn归一化的流程如下图。由于改变了特征的分布，最后需要对归一化后的数值进行进一步处理。
  
-![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/layernorm.png)
+**multiplicative attention vs. additive attention**: 作者在文中指出，使用乘法(点乘)注意力比加法注意力在实践中更快，更节省空间(参数更少)。加法注意力实则为一个具有单隐层的神经网络，如下：
 
-* multi-head的作用 (https://www.zhihu.com/question/341222779/answer/814111138)
+![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/attention_add_dot.jpeg)
 
-**ffnn**：每个encoder/decoder的不同timestep共享参数，但不同的encoder/decoder参数独立。
+文中指出，在d_k较小时(上图的h或s的维度)，两种机制表现类似；当d_k变大时，加法注意力的效果会超过点乘注意力的效果 (这篇论文有详细的对比实验：https://arxiv.org/abs/1703.03906)。
 
-**multiplicative attention (space-effient) vs. additive attention**: 作者在文中指出，使用乘法注意力机制比加法注意力在实践中更快，更节省空间。
+为什么d_k越大效果(最后收敛的loss)会越差呢？d_k越大，query和key需要点乘并加和的项也会变多(query和key每个维度的均值为0，方差为1)，最后得到的针对某个key的attention score均值为0，方差为d_k。如果有个别attention score较大，经过softmax后，会把较大的概率分配给attention score最高的那个标签; 而softmax的梯度在其中某个概率接近1的时候，会趋近于0，导致梯度更新缓慢且困难 (参见知乎：https://www.zhihu.com/question/339723385)。
 
- (additive has better performance when dk becomes larger, similar performance when dk is small, https://arxiv.org/abs/1703.03906)
+
+于是文章对attention score进行scaled (文章称为scaled dot product attention)，控制方差依旧为1，解决梯度更新困难的问题：
+
+![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/scaled_dot_atte.png)
+
+ 
+**multi-head的作用** (https://www.zhihu.com/question/341222779/answer/814111138)
 
 * soft attention (weighted attention score) vs. hard attention (max attention score) 
 
-* why scaled dot product attention: https://www.zhihu.com/question/339723385
 * Adam optimizer的设置(加入warmup)
 * Regularization: residual dropouts和label smoothing
 * 位置编码的理解
