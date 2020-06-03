@@ -208,10 +208,10 @@ ln和bn归一化的流程如下图。由于改变了特征的分布，最后需�
 
 文中指出，在d_k较小时(上图的h或s的维度)，两种机制表现类似；当d_k变大时，加法注意力的效果会超过点乘注意力的效果 (这篇论文有详细的对比实验：https://arxiv.org/abs/1703.03906)。
 
-为什么d_k越大效果(最后收敛的loss)会越差呢？d_k越大，query和key需要点乘并加和的项也会变多(query和key每个维度的均值为0，方差为1)，最后得到的针对某个key的attention score均值为0，方差为d_k。如果有个别attention score较大，经过softmax后，会把较大的概率分配给attention score最高的那个标签; 而softmax的梯度在其中某个概率接近1的时候，会趋近于0，导致梯度更新缓慢且困难 (参见知乎：https://www.zhihu.com/question/339723385)。
+为什么d_k越大效果(最后收敛的loss)会越差呢？d_k越大，query和key需要点乘并加和的项也会变多(query和key每个维度的均值为0，方差为1)，最后得到的针对某个key的attention score均值为0，方差为d_k。如果有个别attention score较大 (数量级的差别)，经过softmax后，会把较大的概率分配给这个attention score对应的标签; 这就导致在反向传播中，这个softmax的梯度会趋近于0，导致梯度更新缓慢且困难 (参见[知乎](https://www.zhihu.com/question/339723385))。
 
 
-于是文章对attention score进行scaled (文章称为scaled dot product attention)，控制方差依旧为1，解决梯度更新困难的问题：
+于是文章对attention score进行放缩 (scaled dot product attention)，控制每个注意力分数的方差都为1，避免出现注意力分数过大导致softmax值一家独大的现象。有效地解决梯度更新困难的问题：
 
 ![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/scaled_dot_atte.png)
 
