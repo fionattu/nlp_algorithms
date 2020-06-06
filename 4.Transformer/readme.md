@@ -210,7 +210,7 @@ ln和bn的流程都是一样的 (下面用bn论文截图)。如下图：
 ![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/scaled_shift_ln.png)
 
 
-但实际发现，规范化在激活函数之后效果更好，所以查看pytorch的代码，发现两个参数都有默认的取值，直接用规范化后的数字即可:
+但实际发现，规范化在激活函数之后效果更好，所以当查看pytorch底层代码时，发现两个参数都有默认的取值，实则直接用了规范化后的数值:
 
 ![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/pt_bn.png)
 
@@ -230,13 +230,15 @@ ln和bn的流程都是一样的 (下面用bn论文截图)。如下图：
 ![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/scaled_dot_atte.png)
 
  
-**multi-head的作用** (https://www.zhihu.com/question/341222779/answer/814111138)
+**multi-head的作用**: (感兴趣可以看看[这篇知乎](https://www.zhihu.com/question/341222779/answer/814111138)): 原文中作者指出使用多头是因为发现benefitial, 也就是实验发现多头效果更好，并没有理论支撑。从作者附上的appendix中，也可以看出同个单词的不同head, attend的单词也是不一样，于是我们可以理解，模型可以通过多头去自己学习不同的特征空间。
 
-* soft attention (weighted attention score) vs. hard attention (max attention score) 
+**soft attention (weighted attention score) vs. hard attention (max attention score)**: soft attention在于我们最后的输出是输入的注意力加权之和，也就是所有参与注意力计算的输入都会参与结果的计算；而hard attention只会选取注意力最高的输入。
+
+**位置编码(Positional Encoding)的理解**: 由于注意力机制不能像rnn网络一样捕捉序列顺序，所以作者加入了位置编码信息来弥补这种缺陷。
 
 * Adam optimizer的设置(加入warmup)
 * Regularization: residual dropouts和label smoothing
-* 位置编码的理解
+
 * 模型结构深入理解：[The Annotated Transformer](http://nlp.seas.harvard.edu/2018/04/03/attention.html)
 
 
