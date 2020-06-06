@@ -193,15 +193,29 @@ Multi-head Attention确实能给模型带来性能的提升。通过查阅资料
 
 **ffnn**：每个encoder/decoder的不同timestep共享参数，但不同的encoder/decoder参数独立。
 
-**Layernorm的作用**: ln ([layernorm](https://zhuanlan.zhihu.com/p/54530247))是对一个样本的所有特征进行归一化。如下图，将残差X和attention网络输出Z相加后得到一个2x4的张量，然后对这8个值进行归一化。
+**Layernorm的作用**: [batchnorm](https://arxiv.org/pdf/1502.03167.pdf)是最初提出来的对神经元输入进行规范化的方法, 后续提出的laynorm, groupnorm, instancenorm都是batchnorm的改良版本。
+
+[Layernorm](https://zhuanlan.zhihu.com/p/54530247)是对一个样本的所有特征进行归一化。如下图，将残差X和attention网络输出Z相加后得到一个2x4的张量，然后对这8个值进行归一化。
 
 ![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/layernorm.png)
 
 这里提一下ln和bn ([batchnorm](https://zhuanlan.zhihu.com/p/54171297))的不同。bn是沿着batch的方向，对同一个特征进行归一化。由于对同一个特征进行操作，bn比ln更好理解，bn在batch较大，即样本数较多时，取得的效果(loss)要优于ln；但是当样本数较小时，例如rnn的输入序列长短相差较多时，在后面的timestep样本已经比较少，导致bn失去全局统计的优势，效果要比ln差。
 
+ln和bn的流程都是一样的 (下面用bn论文截图)。如下图：
 
-ln和bn归一化的流程如下图。由于改变了特征的分布，最后需要对归一化后的数值进行进一步处理。
- 
+![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/ln.png)
+
+所有的方法都会对规范化后的数值进行调整(scale and shift)，最后加入两个可学习的参数对数值进行进一步处理。这是因为作者认为由于改变了特征的分布，可能损害数据本身的表达能力，例如x改变后可能导致激活函数的输入只在线性区域，失去激活函数本身的非线性转换功能 (是的，所有论文都假设规范化发生在激活函数之前):
+
+![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/scaled_shift_ln.png)
+
+
+但实际发现，规范化在激活函数之后效果更好，所以查看pytorch的代码，发现两个参数都有默认的取值，直接用规范化后的数字即可:
+
+![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/pt_bn.png)
+
+
+
 **multiplicative attention vs. additive attention**: 作者在文中指出，使用乘法(点乘)注意力比加法注意力在实践中更快，更节省空间(参数更少)。加法注意力实则为一个具有单隐层的神经网络，如下：
 
 ![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/attention_add_dot.jpeg)
