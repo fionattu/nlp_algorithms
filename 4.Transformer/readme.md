@@ -179,7 +179,7 @@ Multi-head Attention整个过程可以用下图表示，注意最终的z和x的�
 
 **位置编码(Positional Encoding)的理解**: 由于注意力机制不能像rnn网络一样捕捉序列顺序，所以作者加入了位置编码信息来弥补这种缺陷：
 
-[images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/positional_encoding.png)
+![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/positional_encoding.png)
 
 其中，i是位置向量的index, pos是词语在句子中的index。文中指出，这种编码方式有利于体现不同词语的相对位置。如[参考资料](https://datascience.stackexchange.com/questions/51065/what-is-the-positional-encoding-in-the-transformer-model)指出，我们比较不同词语的同个i，其实是三角函数的平移(相位差)，也就是文中指出的，pos+k的encoding可以表示成pos的线性组合：例如sin(pos+k) = sin(pos)cosk + cos(pos)sink。
 
