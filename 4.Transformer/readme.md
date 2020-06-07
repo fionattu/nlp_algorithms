@@ -104,7 +104,7 @@ ELMo预训练模型的加入提升了所有nlp下游任务的性能，超越了�
 
 * Transformer论文精读：Attention is all you need
 
-* [用Jupyter一步步实现Transformer](http://nlp.seas.harvard.edu/2018/04/03/attention.html)
+* [第一作者用Jupyter一步步实现Transformer](http://nlp.seas.harvard.edu/2018/04/03/attention.html)
 
 * [外国博主Jay Alammar对前沿nlp模型ELMo/transformer/bert的详解](http://jalammar.github.io)
 
@@ -168,20 +168,20 @@ Multi-head Attention整个过程可以用下图表示，注意最终的z和x的�
 
 ![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/multihead_3.png)
 
-Multi-head Attention确实能给模型带来性能的提升。通过查阅资料，发现有较多论文表明，不同层的attention是有其作用的，底层主要提取词语的语法特征，顶层主要提取语义特征。既然同一层的作用一样，attention的输入也一样，设置多头的作用是什么呢？目前有多种说法尚未得到充分证实：
-
-1. 提取不同特征（有可视化发现的确每个头提取的pattern是不一样的）；
-2. 等于ensemble功能
-3. dropout功能；
-
-论文还说明，head的数量不在多，2的表现差，但4，6，8的表现是差不多的。
+**multi-head的作用**: (感兴趣可以看看[这篇知乎](https://zhuanlan.zhihu.com/p/69919890))。原文中作者指出使用多头是因为发现benefitial, 也就是实验发现多头效果更好，并没有理论支撑。从作者附上的appendix中，也可以看出同个单词的不同head, attend的单词也不一样。于是我们可以这样理解：模型的多头attention参数(K,Q,V矩阵)不共享，可训练参数多，赋予了模型专注于不同位置的能力，也就是说模型可以通过多头去自己学习不同特征空间的注意力机制，比如不同的子空间可能关注指代，依存等不同句法关系，最后综合表示成各个子空间的关联关系，这样极大提升了attention的表现能力。
 
 
 ### Encoder: Positional Encoding 
 
-因为丢失掉RNN的word order信息，一开始word embedding还考虑了位置编码:
+位置编码的维度和word embedding的维度相同：
 
 ![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/multihead_4.png)
+
+**位置编码(Positional Encoding)的理解**: 由于注意力机制不能像rnn网络一样捕捉序列顺序，所以作者加入了位置编码信息来弥补这种缺陷：
+
+[images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/positional_encoding.png)
+
+其中，i是位置向量的index, pos是词语在句子中的index。文中指出，这种编码方式有利于体现不同词语的相对位置。如[参考资料](https://datascience.stackexchange.com/questions/51065/what-is-the-positional-encoding-in-the-transformer-model)指出，我们比较不同词语的同个i，其实是三角函数的平移(相位差)，也就是文中指出的，pos+k的encoding可以表示成pos的线性组合：例如sin(pos+k) = sin(pos)cosk + cos(pos)sink。
 
 ### Decoder: Encoder-Decoder Attention
 
@@ -229,18 +229,11 @@ ln和bn的流程都是一样的 (下面用bn论文截图)。如下图：
 
 ![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/scaled_dot_atte.png)
 
- 
-**multi-head的作用**: (感兴趣可以看看[这篇知乎](https://www.zhihu.com/question/341222779/answer/814111138)): 原文中作者指出使用多头是因为发现benefitial, 也就是实验发现多头效果更好，并没有理论支撑。从作者附上的appendix中，也可以看出同个单词的不同head, attend的单词也是不一样，于是我们可以理解，模型可以通过多头去自己学习不同的特征空间。
 
 **soft attention (weighted attention score) vs. hard attention (max attention score)**: soft attention在于我们最后的输出是输入的注意力加权之和，也就是所有参与注意力计算的输入都会参与结果的计算；而hard attention只会选取注意力最高的输入。
 
-**位置编码(Positional Encoding)的理解**: 由于注意力机制不能像rnn网络一样捕捉序列顺序，所以作者加入了位置编码信息来弥补这种缺陷。
-
 * Adam optimizer的设置(加入warmup)
 * Regularization: residual dropouts和label smoothing
-
-* 模型结构深入理解：[The Annotated Transformer](http://nlp.seas.harvard.edu/2018/04/03/attention.html)
-
 
 
 ### GPT
