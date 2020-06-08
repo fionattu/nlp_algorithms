@@ -238,9 +238,14 @@ ln和bn的流程都是一样的 (下面用bn论文截图)。如下图：
 
 ### GPT
 
-### BERT
+### BERT (Bidirectional Encoder Representations from Transformers)
 
-Bert的提出使得nlp 11种任务达到突破。基于深度的双向transformer原理，采用预训练+微调的思想 (pre-training and fine-tuning)。
+Bert的提出使得nlp 11种任务达到突破，其结构是堆叠transformer的encoder层(不使用decoder层，从全名也可以看出)，达到抽取语言深层特征的目的，最后连接FFNN+softmax完成特定任务。Bert采用预训练+微调的思想 (pre-training and fine-tuning)，模型提供预训练参数，微调是留给使用者进行的任务。
+
+* Bert具备两种不同大小的模型 (其中L/H/A分别为num_encoder_layers/hidden_size/num_self_attention_heads)
+
+	* BERT_BASE (L=12, H=768, A=12, Total Parameters=110M) 
+	* BERT_LARGE (L=24, H=1024, A=16, Total Parameters=340M).
 
 **双向transformer**：
 
@@ -248,22 +253,28 @@ Bert的提出使得nlp 11种任务达到突破。基于深度的双向transforme
 
 **预训练两个子任务**：
 
-* MLM (Masked Language Model)
+* "[CLS]"和"[SEP]": bert使用"[CLS]"标识符作为每个训练样本的开始字符，使用"[SEP]"标识符来分割sentence (预训练的NSP任务，微调的QA, NLI任务等)。
 
-* NSP (Next Sentence Prediction) 
+* MLM (Masked Language Model): 文中指出单向LM(GPT使用的unidirectional decoder), 或者直接联合正反hidden states(elmo使用的bidirectional rnn)的方法，都不能很好地体现双向的优势。于是作者提出了MLM的方法，既可以同时训练双向的LM，又可以防止一个词看见它自己(see itself)。"自己看见自己"意思是在**多层双向**encoder中，每个词的输入包括了它自己在底层被encoding的信息。如下图，预测T2的时候，T2的第二个隐层会接受到所有Ti第一个隐层传递来的消息(例如T1)，这个消息已经包含了它自己，因为E2被编码进第一层的所有隐层。
+
+![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/bert_seeself.png)
+
+MLM的具体方法是从输入序列中随机选取15%的单词，标记为"[MASK]"标识符(80%概率)，替换成其他随机单词(10%概率)，或者保持不变(10%概率)，然后整个样本的目标从LM替换成只预测这些被选中单词的输出 (为它自己)，这样做的目的是既可以双向编码，又可以缓解“自己看见自己”的问题，但注意实际上不是严格的LM优化目标。
+
+* NSP (Next Sentence Prediction): 文中指出，nlp任务如QA, NLI(Natural Language Inference)需要模型理解句子之间的关系，而单纯训练LM是不能捕捉这种关系的，所以作者在预训练加入NSP任务。
+
+MLM和NSP训练结束后，参数作为微调下游任务的初始化参数。
 
 **其他要注意的细节**：
 
-* 输入embedding
+* (token/segment/positional) Embedding的初始化
 
-* "[CLS]"和"[SEP]"
 
-* Bert具备两种不同大小的模型
+**应用到下游任务**：
+(1) feature extraction
+(2) fine-tuning
 
-	* BERTBASE (L=12, H=768, A=12, Total Parameters=110M) 
-	* BERTLARGE (L=24, H=1024, A=16, Total Parameters=340M).
-
-**下游任务的微调方法**：
+**实验效果**：
 
 ## 论文精读
 
