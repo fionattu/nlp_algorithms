@@ -11,7 +11,7 @@ from constants import Consts
 
 torch.manual_seed(1)
 pkl_fname = "data/msra_ner.pkl"
-model_fname = "model/bilstmcrf_{}.pt".format(Consts.N_EPOCH)
+model_fname = "model/bilstmcrf_{}.pt".format(Consts.N_EPOCHS)
 
 dtype = torch.FloatTensor
 
@@ -138,7 +138,7 @@ def train():
     valid_f1 = -1000
     stop = False
     start_t = time.time()
-    for epoch in range(Consts.N_EPOCH):
+    for epoch in range(Consts.N_EPOCHS):
         # or model.zero_grad() since all model parameters are in optimizer
         if stop:
             break

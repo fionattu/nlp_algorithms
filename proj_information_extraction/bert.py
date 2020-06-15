@@ -5,7 +5,7 @@ from transformers import BertModel, BertTokenizer
 class Bert(nn.Module):
     def __init__(self, bert_model_dir, n_hidden, n_tags):
         self.model = BertModel.from_pretrained(bert_model_dir)
-        # self.tokenizer = BertTokenizer.from_pretrained(bert_model_dir)
+        self.tokenizer = BertTokenizer.from_pretrained(bert_model_dir)
         self.linear = nn.Linear(n_hidden, n_tags)
 
     def forward(self, X):
