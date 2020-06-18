@@ -11,6 +11,7 @@ class Config(object):
         self.n_tags = 11
         self.n_epochs = 1
         self.hidden_dim = 768
+        self.max_len = 128
         self.tag2id = {'': 0,
                        'B_ns': 1,
                        'B_nr': 2,

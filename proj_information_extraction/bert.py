@@ -1,15 +1,14 @@
 import torch.nn as nn
-from transformers import BertModel, BertTokenizer
+from transformers import BertModel, BertForTokenClassification
 
 
 class Bert(nn.Module):
-    def __init__(self, bert_model_dir, n_hidden, n_tags):
-        self.model = BertModel.from_pretrained(bert_model_dir)
-        self.tokenizer = BertTokenizer.from_pretrained(bert_model_dir)
-        self.linear = nn.Linear(n_hidden, n_tags)
+    def __init__(self, config):
+        # self.model = BertModel.from_pretrained(bert_model_dir)
+        # self.linear = nn.Linear(n_hidden, n_tags)
+        self.model = BertForTokenClassification.from_pretrained(config.bert_model_dir, num_labels=config.n_tags)
 
     def forward(self, X):
-        # tokens = self.tokenizer(self.tokenizer.decode(self.tokenizer.encode(sentences)))
-        # inputs = self.tokenizer.encode(sentences, return_tensors='pt')
-        sentences, masks = X[0], X[1]
-        last_hidden_states = self.model(sentences, attention_mask=masks, output_all_encoded_layers=False)[1]
+        input_ids, tag_ids, att_masks = X[0], X[1], X[2]
+        loss = self.model(input_ids, attention_mask=att_masks, labels=tag_ids)[0]
+        return loss
