@@ -8,7 +8,7 @@ cn_bert__dir = "bert/chinese_L-12_H-768_A-12/"
 tokenizer = BertTokenizer.from_pretrained(cn_bert__dir)
 
 # Tokenize input
-text = "[CLS] Who was Jim Henson ? [SEP] Jim Henson was a puppeteer [SEP]"
+text = "[CLS]我们试试[SEP]"
 tokenized_text = tokenizer.tokenize(text)
 
 # Mask a token that we will try to predict back with `BertForMaskedLM`

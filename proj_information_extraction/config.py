@@ -4,9 +4,9 @@ from transformers import BertTokenizer
 
 class Config(object):
     def __init__(self):
-        self.bert_path = "bert/chinese_L-12_H-768_A-12/"
-        self.tokenizer = BertTokenizer.from_pretrained(self.bert_path)
-        self.data_path = "data/word2tag.txt"
+        self.chinese_bert_path = "bert/chinese_L-12_H-768_A-12/"
+        self.train_path = "data/word2tag.txt"
+        self.use_gpu = 0
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.n_tags = 11
         self.n_epochs = 1
@@ -23,3 +23,5 @@ class Config(object):
                        'E_nr': 8,
                        'E_ns': 9,
                        'o': 0}
+        self.lr = 0.001
+        self.batch_size = 32
