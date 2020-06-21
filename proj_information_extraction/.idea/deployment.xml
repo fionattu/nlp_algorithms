@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" autoUpload="Always" serverName="jtu2@10.127.3.21:22">
+    <serverData>
+      <paths name="jtu2@10.127.3.21:22">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/jtu2/dev/HetGNN/ie" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+    <option name="myAutoUpload" value="ALWAYS" />
+  </component>
+</project>
