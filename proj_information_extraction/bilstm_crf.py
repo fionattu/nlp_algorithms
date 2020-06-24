@@ -6,7 +6,7 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 class BiLSTM_CRF(nn.Module):
     def __init__(self, n_embedding, n_hidden, tag2id, start_tag, end_tag):
-        super(BiLSTM_CRF, self).__init__()
+        2
         self.n_embedding = n_embedding
         self.n_hidden = n_hidden
         self.n_tags = len(tag2id)
