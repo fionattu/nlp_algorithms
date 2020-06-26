@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="ca86882b-089d-49b9-925d-eab580c6dd0e" name="10.127.3.21" url="http://10.127.3.21">
+        <fileTransfer host="10.127.3.21" port="22" rootFolder="/home/jtu2/dev/HetGNN/ie" accessType="SFTP">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+          <option name="port" value="22" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

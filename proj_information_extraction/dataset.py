@@ -22,13 +22,16 @@ class BertDataset(Dataset):
         self.max_len = config.max_len
         self.pad_id = self.tokenizer.convert_tokens_to_ids('[PAD]')
         self.tag2id = config.tag2id
+        self.use_gpu = config.use_gpu
+        self.device = config.device
 
     def __len__(self):
         return len(self.inputs)
 
     def __getitem__(self, item):
         sentence, tag = self.inputs[item], self.tags[item]
-
+        if len(sentence) > self.max_len:
+            sentence, tag = sentence[:self.max_len], tag[:self.max_len]
         # init inputs, tags, attention_masks
         # pad with '[PAD]' for inputs and '' for tags
         input_ids, att_masks, tag_ids = self.pad_id * np.ones(self.max_len), \
@@ -57,7 +60,6 @@ class BertDataset(Dataset):
         att_masks = torch.tensor(att_masks, dtype=torch.int)
 
         return input_ids, tag_ids, att_masks
-
 
 # if __name__ == '__main__':
 #     config = Config()

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="RemoteMappingsManager">
+    <list>
+      <list>
+        <remote-mappings server-id="python@sftp://jtu2@10.127.3.21:22/home/jtu2/.conda/envs/gnn/bin/python" />
+      </list>
+    </list>
+  </component>
+</project>

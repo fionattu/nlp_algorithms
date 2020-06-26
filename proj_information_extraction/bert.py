@@ -17,15 +17,17 @@ class Config(object):
         self.tokenizer = BertTokenizer.from_pretrained(self.chinese_bert_path)
         self.train = ['data/MSRA/train_inputs.txt', 'data/MSRA/train_labels.txt']
         self.valid = ['data/MSRA/valid_inputs.txt', 'data/MSRA/valid_labels.txt']
-        self.use_gpu = 0
+        self.use_gpu = 1
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.n_tags = 10
-        self.n_epochs = 30
+        self.n_epochs = 10
         self.hidden_dim = 768
         self.max_len = 150
         self.lr = 0.001
         self.batch_size = 32
         self.num_workers = 4
+        self.eval_freq = 2
+        self.model_save_path = "model/bert_{}.pt".format(self.n_epochs)
         self.tag2id = {'': 0,
                        'B_ns': 1,
                        'B_nr': 2,
