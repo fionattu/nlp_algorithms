@@ -20,13 +20,14 @@ class Config(object):
         self.use_gpu = 1
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.n_tags = 10
-        self.n_epochs = 10
+        self.n_epochs = 20
         self.hidden_dim = 768
         self.max_len = 150
         self.lr = 0.001
         self.batch_size = 32
         self.num_workers = 4
-        self.eval_freq = 2
+        self.eval_freq = 1
+        self.f1_conv = 0.01
         self.model_save_path = "model/bert_{}.pt".format(self.n_epochs)
         self.tag2id = {'': 0,
                        'B_ns': 1,

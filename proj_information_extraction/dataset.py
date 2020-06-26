@@ -52,7 +52,9 @@ class BertDataset(Dataset):
             # attention masks
             att_masks[:n_valid] = np.ones(n_valid)
         else:
-            print("not same length")
+            input_ids, att_masks, tag_ids = self.pad_id * np.ones(self.max_len), \
+                                            np.zeros(self.max_len), \
+                                            np.zeros(self.max_len)
 
         # convert to torch long tensor
         input_ids = torch.tensor(input_ids, dtype=torch.long)

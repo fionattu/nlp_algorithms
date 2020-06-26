@@ -66,7 +66,8 @@ def evaluate(config, model):
 
 
 def train(config, model):
-    optimizer = optim.Adam(model.parameters(), config.lr)
+    # only fine-tune the linear classifier layer
+    optimizer = optim.Adam(list(model.model.classifier.parameters()), config.lr)
     f1 = -1000
 
     for epoch in range(config.n_epochs):
@@ -97,10 +98,12 @@ def train(config, model):
                                                                                  metrics['precision'],
                                                                                  metrics['recall'],
                                                                                  metrics['f1']))
-            if epoch > 10 and (abs(metrics['f1'] - f1) < 0.001 or metrics['f1'] < f1):
+            if epoch > 10 and (abs(metrics['f1'] - f1) < config.f1_conv or metrics['f1'] < f1):
                 break
+            if metrics['f1'] > f1:
+                f1 = metrics['f1']
 
-    torch.save(model.state_dict(), config.model_save_path)
+        torch.save(model.state_dict(), config.model_save_path)
 
 
 if __name__ == '__main__':
