@@ -4,22 +4,54 @@ from torch.autograd import Variable
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 
+class Config(object):
+    def __init__(self):
+        self.start_tag = '<START>'
+        self.end_tag = '<END>'
+        self.batch_size = 200
+        self.n_epoch = 10000
+        self.embedding_dim = 100
+        self.hidden_dim = 5
+        self.max_len = 50
+        self.lr = 0.001
+        self.eval_freq = 300
+        self.model_save_path = "../checkpoints/bilstmcrf_{}.pt".format(self.n_epoch)
+        self.tag2id = {'': 0,
+                       'B_ns': 1,
+                       'B_nr': 2,
+                       'B_nt': 3,
+                       'M_nt': 4,
+                       'M_nr': 5,
+                       'M_ns': 6,
+                       'E_nt': 7,
+                       'E_nr': 8,
+                       'E_ns': 9,
+                       'o': 0,
+                       self.start_tag: 10,
+                       self.end_tag: 11}
+
+
 class BiLSTM_CRF(nn.Module):
-    def __init__(self, n_embedding, n_hidden, tag2id, start_tag, end_tag):
-        self.n_embedding = n_embedding
-        self.n_hidden = n_hidden
-        self.n_tags = len(tag2id)
-        self.tag2id = tag2id
+    def __init__(self, config):
+        super(BiLSTM_CRF, self).__init__()
+        self.embedding_dim = config.embedding_dim
+        self.hidden_dim = config.hidden_dim
+        self.tag2id = config.tag2id
+        self.n_tags = len(self.tag2id)
 
-        self.START_TAG = start_tag
-        self.END_TAG = end_tag
+        self.start_tag = config.start_tag
+        self.end_tag = config.end_tag
 
-        self.lstm = nn.LSTM(input_size=n_embedding, hidden_size=n_hidden, bidirectional=True, batch_first=True)
-        self.hidden2tag = nn.Linear(n_hidden * 2, self.n_tags, bias=True)
+        self.lstm = nn.LSTM(input_size=self.embedding_dim,
+                            hidden_size=self.hidden_dim,
+                            bidirectional=True,
+                            batch_first=True)
+        self.hidden2tag = nn.Linear(self.hidden_dim * 2, self.n_tags, bias=True)
 
         self.transitions = nn.Parameter(torch.randn(self.n_tags, self.n_tags))
-        self.transitions.data[:, tag2id[self.START_TAG]] = -10000
-        self.transitions.data[tag2id[self.END_TAG], :] = -10000
+        self.transitions.data[:, self.tag2id[self.start_tag]] = -10000
+        self.transitions.data[self.tag2id[self.end_tag], :] = -10000
+        self.config = config
 
     def _lstm_features(self, X, length):
         """Get lstm features after the fully-connected layer
@@ -35,8 +67,12 @@ class BiLSTM_CRF(nn.Module):
         X = X.transpose(0, 1)
         X = pack_padded_sequence(X, length)
 
-        hidden_state = Variable(torch.zeros(1 * 2, batch_size, self.n_hidden))
-        cell_state = Variable(torch.zeros(1 * 2, batch_size, self.n_hidden))
+        hidden_state = Variable(torch.zeros(1 * 2, batch_size, self.hidden_dim))
+        cell_state = Variable(torch.zeros(1 * 2, batch_size, self.hidden_dim))
+
+        if self.config.use_gpu == 1:
+            hidden_state = hidden_state.to(self.config.device)
+            cell_state = cell_state.to(self.config.device)
 
         # [seq_len, batch, num_directions * hidden_size]
         lstm_out, (_, _) = self.lstm(X, (hidden_state, cell_state))
@@ -56,9 +92,9 @@ class BiLSTM_CRF(nn.Module):
         # emissions = [batch_size, seq_len, n_tags]
         emissions = emissions.transpose(0, 1)
         batch_size, seq_len, _ = emissions.shape
-        scores = torch.zeros(batch_size)
+        scores = torch.zeros(batch_size, device=self.config.device)
         first_tags = tags[:, 0]
-        t_scores = self.transitions[self.tag2id[self.START_TAG], first_tags]
+        t_scores = self.transitions[self.tag2id[self.start_tag], first_tags]
         # emissions[:, 0] = [batch_size, n_tags] as pytorch remove 1-dimension automatically
         e_scores = (emissions[:, 0].gather(1, tags[:, 0].unsqueeze(1))).squeeze()
         scores += (e_scores + t_scores)
@@ -70,9 +106,9 @@ class BiLSTM_CRF(nn.Module):
             scores += (e_scores + t_scores) * is_valid
 
         # dim=1: sum across columns
-        last_valid_idx = torch.sum(masks.type(torch.IntTensor), 1) - 1
+        last_valid_idx = torch.sum(masks.type(torch.IntTensor), 1).to(self.config.device) - 1
         last_tags = tags.gather(1, last_valid_idx.unsqueeze(1)).squeeze()
-        scores += self.transitions[last_tags, self.tag2id[self.END_TAG]]
+        scores += self.transitions[last_tags, self.tag2id[self.end_tag]]
         return scores
 
     def _compute_log_partition(self, emissions, masks):
@@ -89,7 +125,7 @@ class BiLSTM_CRF(nn.Module):
         emissions = emissions.transpose(0, 1)
 
         # [batch_size, n_tags]
-        alphas = self.transitions[self.tag2id[self.START_TAG], :] + emissions[:, 0]
+        alphas = self.transitions[self.tag2id[self.start_tag], :] + emissions[:, 0]
 
         for i in range(1, seq_len):
             # [batch_size, n_tags] -> [batch_size, 1, n_tags]
@@ -115,7 +151,7 @@ class BiLSTM_CRF(nn.Module):
             # [batch_size, n_tags]
             alphas = new_alphas * is_valid + alphas * (1 - is_valid)
 
-        scores = alphas + self.transitions[:, self.tag2id[self.END_TAG]]
+        scores = alphas + self.transitions[:, self.tag2id[self.end_tag]]
 
         return torch.logsumexp(scores, dim=1)
 
@@ -159,7 +195,7 @@ class BiLSTM_CRF(nn.Module):
         emissions = emissions.transpose(0, 1)
 
         # [batch_size, n_tags]
-        alphas = emissions[:, 0] + self.transitions[self.tag2id[self.START_TAG], :]
+        alphas = emissions[:, 0] + self.transitions[self.tag2id[self.start_tag], :]
         back_track_tags = []
 
         for i in range(1, seq_len):
@@ -178,7 +214,7 @@ class BiLSTM_CRF(nn.Module):
             alphas = max_scores * is_valid + alphas * (1 - is_valid)
             back_track_tags.append(max_score_tags)
 
-        scores = alphas + self.transitions[:, self.tag2id[self.END_TAG]]
+        scores = alphas + self.transitions[:, self.tag2id[self.end_tag]]
 
         # max_end_scores = [batch_size]
         # max_scores_tags = [batch_size]

@@ -1,12 +1,20 @@
 from torch.utils.data import DataLoader
 from bert import Bert, Config
-from dataset import BertDataset
+from bert_dataset import BertDataset
 import torch.optim as optim
 import numpy as np
 import logging
 import torch
 
 logging.basicConfig(level=logging.INFO)
+
+
+def set_seed():
+    seed = 1
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
 
 
 def retrieve_entity(tag_ids):
@@ -107,6 +115,7 @@ def train(config, model):
 
 
 if __name__ == '__main__':
+    set_seed()
     config = Config()
     model = Bert(config)
     train(config, model)

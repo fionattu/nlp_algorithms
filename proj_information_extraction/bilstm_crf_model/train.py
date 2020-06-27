@@ -6,12 +6,10 @@ import time
 from torch import optim
 from torch.autograd import Variable
 
-from bilstm_crf import BiLSTM_CRF
-from constants import Consts
+from bilstm_crf import Config, BiLSTM_CRF
 
 torch.manual_seed(1)
 pkl_fname = "data/msra_ner.pkl"
-model_fname = "model/bilstmcrf_{}.pt".format(Consts.N_EPOCHS)
 
 dtype = torch.FloatTensor
 
@@ -98,21 +96,21 @@ def retrieve_entity(x, y, masks, id2tag, id2word):
     return result
 
 
-def get_f1(model, test=True):
+def get_f1(model, config, test=True):
     if test:
-        model = BiLSTM_CRF(Consts.EMBEDDING_DIM, Consts.HIDDEN_DIM, tag2id, Consts.START_TAG, Consts.END_TAG)
-        model.load_state_dict(torch.load(model_fname))
+        model = BiLSTM_CRF(config)
+        model.load_state_dict(torch.load(config.model_save_path))
         model.eval()
         x, y = x_test, y_test
     else:
         x, y = x_valid, y_valid
 
-    n_batch = math.ceil(len(x) / Consts.BATCH_SIZE)
+    n_batch = math.ceil(len(x) / config.batch_size)
     entity_pred, entity_true = [], []
 
     for i in range(n_batch):
-        start = i * Consts.BATCH_SIZE
-        end = (i + 1) * Consts.BATCH_SIZE if i != (n_batch - 1) else len(x)
+        start = i * config.batch_size
+        end = (i + 1) * config.batch_size if i != (n_batch - 1) else len(x)
         batch_ids, batch_inputs, batch_outputs, masks, length = random_batch(embeddings,
                                                                              x[start:end],
                                                                              y[start:end],
@@ -130,30 +128,30 @@ def get_f1(model, test=True):
     return entity_pred, f1_score, precision, recall
 
 
-def train():
+def train(config):
     # tag_length should not include start/end tags
-    model = BiLSTM_CRF(Consts.EMBEDDING_DIM, Consts.HIDDEN_DIM, tag2id, Consts.START_TAG, Consts.END_TAG)
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    model = BiLSTM_CRF(config)
+    optimizer = optim.Adam(model.parameters(), config.lr)
     # f1 score of validation dataset
     valid_f1 = -1000
     stop = False
     start_t = time.time()
-    for epoch in range(Consts.N_EPOCHS):
-        # or model.zero_grad() since all model parameters are in optimizer
+    for epoch in range(config.n_epoch):
+        # or bert_test.zero_grad() since all bert_test parameters are in optimizer
         if stop:
             break
         optimizer.zero_grad()
 
-        _, batch_inputs, batch_outputs, masks, length = random_batch(embeddings, x_train, y_train, Consts.BATCH_SIZE)
+        _, batch_inputs, batch_outputs, masks, length = random_batch(embeddings, x_train, y_train, config.batch_size)
 
         loss = model.neg_log_likelihood(batch_inputs, batch_outputs, masks, length)
 
         loss.backward()
         optimizer.step()
 
-        if (epoch + 1) % 300 == 0:
+        if (epoch + 1) % config.eval_freq == 0:
             print('Epoch: {:04d}, loss: {:.4f}, seconds: {:.4f}'.format(epoch, loss, time.time() - start_t))
-            entities, new_valid_f1, prec, recall = get_f1(model, test=False)
+            entities, new_valid_f1, prec, recall = get_f1(model, config, test=False)
             print('[Validation]f1 score from {:.6f} to {:.6f}'.format(valid_f1, new_valid_f1))
             print('[Validation]precision: {}, recall: {}\n'.format(prec, recall))
             if epoch > 3000 and (abs(new_valid_f1 - valid_f1) < 0.001 or new_valid_f1 < valid_f1):
@@ -161,11 +159,11 @@ def train():
             if new_valid_f1 > valid_f1:
                 valid_f1 = new_valid_f1
 
-    torch.save(model.state_dict(), model_fname)
+    torch.save(model.state_dict(), config.model_save_path)
 
 
 if __name__ == '__main__':
-    train()
+    train(Config())
     entities, new_valid_f1, prec, recall = get_f1("", test=True)
     print("[Test]f1 score: {:.6f}, precision: {}, recall: {}".format(new_valid_f1, prec, recall))
 

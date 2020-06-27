@@ -1,5 +1,6 @@
 from torch.utils.data import Dataset, DataLoader
 from tqdm import tqdm
+import collections
 import numpy as np
 import torch
 
@@ -12,6 +13,31 @@ def read_file(path, desc):
             result.append(_.replace('\n', '').split(','))
     f.close()
     return result
+
+
+def collate_fn(batch):
+    """
+    :param batch: list of batch_size, each is a tuple returned by __getitem__()
+    :return: batch sorted by length
+    """
+    # tuple=[input_ids, tag_ids, att_masks]
+    input_ids, tag_ids, masks, lengths = [], [], [], []
+    len_masks = {torch.sum(t[2]).item(): i for i, t in enumerate(batch)}
+    sorted_dict = collections.OrderedDict(sorted(len_masks.items(), reverse=True))
+    for k, v in sorted_dict.items():
+        if k > 0:
+            input_ids.append(batch[v][0].numpy())
+            tag_ids.append(batch[v][1].numpy())
+            masks.append(batch[v][2].numpy())
+            lengths.append(k)
+
+    # convert to torch long tensor
+    input_ids = torch.LongTensor(input_ids)
+    tag_ids = torch.LongTensor(tag_ids)  # should be long
+    att_masks = torch.IntTensor(masks)
+    lengths = torch.LongTensor(lengths)
+
+    return input_ids, tag_ids, att_masks, lengths
 
 
 class BertDataset(Dataset):
@@ -62,8 +88,3 @@ class BertDataset(Dataset):
         att_masks = torch.tensor(att_masks, dtype=torch.int)
 
         return input_ids, tag_ids, att_masks
-
-# if __name__ == '__main__':
-#     config = Config()
-#     dataset = BertDataset(config, config.train)
-#     data_loader = DataLoader(dataset, batch_size=5, shuffle=False, num_workers=2)
