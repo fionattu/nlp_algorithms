@@ -6,7 +6,7 @@ import time
 from torch import optim
 from torch.autograd import Variable
 
-from bilstm_crf import Config, BiLSTM_CRF
+from bilstm_crf_model import Config, BiLSTM_CRF
 
 torch.manual_seed(1)
 pkl_fname = "data/msra_ner.pkl"

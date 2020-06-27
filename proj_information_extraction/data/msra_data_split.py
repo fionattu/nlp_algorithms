@@ -1,3 +1,6 @@
+"""
+data processing for bert_model model
+"""
 import re
 import random
 
@@ -129,7 +132,7 @@ if __name__ == '__main__':
     msra_data_split = MSRADataSplit(Config())
 
     # create char2tag for all models
-    # msra_data_split.load_data()
+    msra_data_split.load_data()
 
     # split char2tag to train/validation
     msra_data_split.split_data()
