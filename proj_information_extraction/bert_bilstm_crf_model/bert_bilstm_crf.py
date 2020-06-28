@@ -4,8 +4,8 @@ import os
 import torch
 import torch.nn as nn
 from transformers import BertModel, BertTokenizer
-
 from bilstm_crf_model.bilstm_crf import BiLSTM_CRF
+
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '6'
 torch.set_num_threads(10)

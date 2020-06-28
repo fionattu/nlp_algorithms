@@ -1,6 +1,12 @@
-from bert_bilstm_crf import Bert_BiLSTM_CRF, Config
+import os
+import sys
+from pathlib import Path
+sys.path.append(str(Path(os.getcwd()).parent) + '/')
+
 from torch.utils.data import DataLoader
+from bert_bilstm_crf import Bert_BiLSTM_CRF, Config
 from bert_model.bert_dataset import BertDataset, collate_fn
+from utils.metrics import *
 import torch.optim as optim
 import numpy as np
 import logging
@@ -15,35 +21,6 @@ def set_seed():
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
-
-
-def retrieve_entity(tag_ids):
-    result, entity = [], []
-    for i in range(len(tag_ids)):
-        tag = tag_ids[i]  # like 'B_ns'
-        if tag[0] == 'B':
-            entity = [tag[2:], i, i]  # like ('ns', 2, 2)
-        elif tag[0] == 'M' and len(entity) > 0 and entity[0] == tag[2:]:
-            entity[2] = i
-        elif tag[0] == 'E' and len(entity) > 0 and entity[0] == tag[2:]:
-            entity[2] = i
-            result.append(entity)
-            entity = []
-        else:
-            if len(entity) > 0:
-                result.append(entity)
-                entity = []
-    return result
-
-
-def get_metrics(pred_tags, true_tags):
-    pred_tags = retrieve_entity(pred_tags)
-    true_tags = retrieve_entity(true_tags)
-    union = [i for i in pred_tags if i in true_tags]  # TP
-    precision = 1.0 * len(union) / len(pred_tags) if len(pred_tags) != 0 else 0.0
-    recall = 1.0 * len(union) / len(true_tags) if len(true_tags) != 0 else 0.0
-    f1_score = 2 * precision * recall / (precision + recall) if len(union) != 0 else 0.0
-    return {'precision': precision, 'recall': recall, 'f1': f1_score}
 
 
 def evaluate(config, model):
@@ -62,7 +39,7 @@ def evaluate(config, model):
                 att_masks = att_masks.to(config.device)
                 lengths = lengths.to(config.device)
 
-            _, outputs = model(input_ids, att_masks, lengths) # outputs = [batch_size, seq_len, n_valid_tags]
+            _, outputs = model(input_ids, att_masks, lengths)  # outputs = [batch_size, seq_len, n_valid_tags]
 
             tags = tag_ids.to('cpu').numpy()  # [batch_size, seq_len]
             att_masks = att_masks.to('cpu').numpy().sum(1)  # [batch_size]
@@ -102,7 +79,6 @@ def train(config, model):
             optimizer.zero_grad()
 
             loss = model.nll(input_ids, att_masks, tag_ids, lengths)
-            # nll(self, input_ids, att_masks, tag_ids, lengths):
 
             loss.backward()
             optimizer.step()
