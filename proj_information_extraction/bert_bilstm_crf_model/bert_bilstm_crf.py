@@ -7,9 +7,6 @@ from transformers import BertModel, BertTokenizer
 from bilstm_crf_model.bilstm_crf import BiLSTM_CRF
 
 
-os.environ['CUDA_VISIBLE_DEVICES'] = '6'
-torch.set_num_threads(10)
-
 LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
 logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 
@@ -24,12 +21,12 @@ class Config(object):
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.n_epochs = 2000  # 10000 for bilstm
         self.embedding_dim = 768
-        self.hidden_dim = 600
-        self.max_len = 100  # 50 bilstm
+        self.hidden_dim = 500
+        self.max_len = 150  # 50 bilstm
         self.start_tag = '<START>'
         self.end_tag = '<END>'
         self.lr = 0.001
-        self.batch_size = 300  # 200 for bilstm
+        self.batch_size = 200  # 200 for bilstm
         self.num_workers = 4
         self.eval_freq = 5  #
         self.f1_conv = 0.01  #

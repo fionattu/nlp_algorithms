@@ -5,10 +5,7 @@ import torch.nn as nn
 from transformers import BertForTokenClassification, BertTokenizer
 import logging
 import torch
-import os
 
-# os.environ['CUDA_VISIBLE_DEVICES'] = '7'
-torch.set_num_threads(10)
 
 LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
 logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
@@ -22,6 +19,7 @@ class Config(object):
         self.valid = ['../data/MSRA/valid_inputs.txt', '../data/MSRA/valid_labels.txt']
         self.use_gpu = 1
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.fine_tune = True
         self.n_epochs = 20
         self.hidden_dim = 768
         self.max_len = 150

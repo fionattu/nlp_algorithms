@@ -16,6 +16,8 @@ class Config(object):
         self.lr = 0.001
         self.eval_freq = 300
         self.model_save_path = "../checkpoints/bilstmcrf_{}.pt".format(self.n_epoch)
+        self.use_gpu = 0
+        self.device = torch.device('cpu')
         self.tag2id = {'': 0,
                        'B_ns': 1,
                        'B_nr': 2,

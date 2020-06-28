@@ -51,8 +51,12 @@ def evaluate(config, model):
 
 
 def train(config, model):
-    # only fine-tune the linear classifier layer
-    optimizer = optim.Adam(list(model.model.classifier.parameters()), config.lr)
+    if config.fine_tune:
+        # only fine-tune the linear classifier layer
+        optimizer = optim.Adam(list(model.model.classifier.parameters()), config.lr)
+    else:
+        optimizer = optim.Adam(model.parameters(), config.lr)
+
     f1 = -1000
 
     for epoch in range(config.n_epochs):
@@ -92,6 +96,8 @@ def train(config, model):
 
 
 if __name__ == '__main__':
+    os.environ['CUDA_VISIBLE_DEVICES'] = '7'
+    torch.set_num_threads(10)
     set_seed()
     config = Config()
     model = Bert(config)

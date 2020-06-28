@@ -1,3 +1,8 @@
+import os
+import sys
+from pathlib import Path
+sys.path.append(str(Path(os.getcwd()).parent) + '/')
+
 import pickle
 import numpy as np
 import torch
@@ -6,10 +11,9 @@ import time
 from torch import optim
 from torch.autograd import Variable
 
-from bilstm_crf_model import Config, BiLSTM_CRF
+from bilstm_crf import Config, BiLSTM_CRF
 
-torch.manual_seed(1)
-pkl_fname = "data/msra_ner.pkl"
+pkl_fname = "../data/msra_ner.pkl"
 
 dtype = torch.FloatTensor
 
@@ -38,6 +42,14 @@ assert len(tag2id) == len(id2tag)
 assert len(x_train) == len(y_train)
 assert len(x_test) == len(y_test)
 assert len(x_valid) == len(y_valid)
+
+
+def set_seed():
+    seed = 1
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
 
 
 def random_batch(embeddings, x, y, batch_size, random=True):
@@ -163,7 +175,9 @@ def train(config):
 
 
 if __name__ == '__main__':
-    train(Config())
-    entities, new_valid_f1, prec, recall = get_f1("", test=True)
+    set_seed()
+    config = Config()
+    train(config)
+    entities, new_valid_f1, prec, recall = get_f1("", config, test=True)
     print("[Test]f1 score: {:.6f}, precision: {}, recall: {}".format(new_valid_f1, prec, recall))
 

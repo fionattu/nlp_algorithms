@@ -100,6 +100,9 @@ def train(config, model):
 
 
 if __name__ == '__main__':
+    os.environ['CUDA_VISIBLE_DEVICES'] = '6'
+    torch.set_num_threads(10)
+
     set_seed()
     config = Config()
     model = Bert_BiLSTM_CRF(config)
