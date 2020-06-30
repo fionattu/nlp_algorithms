@@ -56,8 +56,14 @@ def train(config, model):
     if config.use_gpu:
         model.cuda()
 
-    # only fine-tune the bilstm_crf_model layers
-    optimizer = optim.Adam(list(model.bilstm_crf.parameters()), config.lr)
+    if config.fine_tune:
+        # Fine-tune bert
+        logging.info('Fine-tune bert and bilstm-crf params!')
+        optimizer = optim.Adam(model.parameters(), config.bert_lr)
+    else:
+        # Feature-based bert
+        logging.info('Fine-tune simply the bilstm-crf params!')
+        optimizer = optim.Adam(list(model.bilstm_crf.parameters()), config.bilstm_crf_lr)
     f1 = -1000
 
     for epoch in range(config.n_epochs):

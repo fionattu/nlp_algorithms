@@ -19,17 +19,19 @@ class Config(object):
         self.valid = ['../data/MSRA/valid_inputs.txt', '../data/MSRA/valid_labels.txt']
         self.use_gpu = 1
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.n_epochs = 2000  # 10000 for bilstm
+        self.fine_tune = False
+        self.n_epochs = 2000
         self.embedding_dim = 768
         self.hidden_dim = 500
-        self.max_len = 150  # 50 bilstm
+        self.max_len = 150
         self.start_tag = '<START>'
         self.end_tag = '<END>'
-        self.lr = 0.001
-        self.batch_size = 200  # 200 for bilstm
+        self.bert_lr = 1e-5
+        self.bilstm_crf_lr = 1e-3
+        self.batch_size = 200
         self.num_workers = 4
-        self.eval_freq = 5  #
-        self.f1_conv = 0.01  #
+        self.eval_freq = 2
+        self.f1_conv = 0.01
         self.model_save_path = "../checkpoints/bert_bilstm_crf_{}.pt".format(self.n_epochs)
         self.tag2id = {'': 0,
                        'B_ns': 1,
@@ -64,6 +66,10 @@ class Bert_BiLSTM_CRF(nn.Module):
         super(Bert_BiLSTM_CRF, self).__init__()
         self.bert = BertModel.from_pretrained(config.chinese_bert_path, output_hidden_states=False)
         self.bilstm_crf = BiLSTM_CRF(config)
+
+        if not config.fine_tune:
+            for param in self.bert.parameters():
+                param.requires_grad = False
 
     def nll(self, input_ids, att_masks, tag_ids, lengths):
         embeddings, _ = self.bert(input_ids, attention_mask=att_masks)

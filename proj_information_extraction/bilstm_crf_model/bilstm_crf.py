@@ -9,12 +9,12 @@ class Config(object):
         self.start_tag = '<START>'
         self.end_tag = '<END>'
         self.batch_size = 200
-        self.n_epoch = 10000
+        self.n_epoch = 100000
         self.embedding_dim = 100
-        self.hidden_dim = 5
-        self.max_len = 50
+        self.hidden_dim = 200
+        self.max_len = 150
         self.lr = 0.001
-        self.eval_freq = 300
+        self.eval_freq = 200
         self.model_save_path = "../checkpoints/bilstmcrf_{}.pt".format(self.n_epoch)
         self.use_gpu = 0
         self.device = torch.device('cpu')
@@ -32,6 +32,20 @@ class Config(object):
                        self.start_tag: 10,
                        self.end_tag: 11}
 
+        self.id2tag = {0: 'o',
+                       1: 'B_ns',
+                       2: 'B_nr',
+                       3: 'B_nt',
+                       4: 'M_nt',
+                       5: 'M_nr',
+                       6: 'M_ns',
+                       7: 'E_nt',
+                       8: 'E_nr',
+                       9: 'E_ns',
+                       10: self.start_tag,
+                       11: self.end_tag}
+        self.n_tags = len(self.id2tag)
+
 
 class BiLSTM_CRF(nn.Module):
     def __init__(self, config):
@@ -39,7 +53,7 @@ class BiLSTM_CRF(nn.Module):
         self.embedding_dim = config.embedding_dim
         self.hidden_dim = config.hidden_dim
         self.tag2id = config.tag2id
-        self.n_tags = len(self.tag2id)
+        self.n_tags = config.n_tags
 
         self.start_tag = config.start_tag
         self.end_tag = config.end_tag
@@ -174,7 +188,6 @@ class BiLSTM_CRF(nn.Module):
         :param end_tag: best end tag of current batch
         :return: sequence of best tags
         """
-
         seq_len = len(back_track)
 
         best_sequence = [end_tag]
@@ -184,11 +197,12 @@ class BiLSTM_CRF(nn.Module):
             best_sequence.append(prev_tag)
 
         best_sequence.reverse()
+
         return best_sequence
 
     def _viterbi_decode(self, emissions, masks):
         """
-        :param emissions: [seq_len, batch_size, nb_labels]
+        :param emissions: [seq_len, batch_size, n_labels]
         :param masks: [batch_size, seq_len]
         :return:
         """
@@ -243,7 +257,7 @@ class BiLSTM_CRF(nn.Module):
     def forward(self, X, masks, length):
         """Predict the best sequence after training"""
 
-        # [seq_len, batch_size, nb_labels]
+        # [seq_len, batch_size, n_labels]
         emissions = self._lstm_features(X, length)
         scores, sequences = self._viterbi_decode(emissions, masks)
         return scores, sequences

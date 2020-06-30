@@ -51,11 +51,17 @@ def evaluate(config, model):
 
 
 def train(config, model):
+    if config.use_gpu:
+        model.cuda()
+
     if config.fine_tune:
-        # only fine-tune the linear classifier layer
-        optimizer = optim.Adam(list(model.model.classifier.parameters()), config.lr)
+        # Fine-tune bert
+        logging.info('Fine-tune bert and classifier params!')
+        optimizer = optim.Adam(model.parameters(), config.bert_lr)
     else:
-        optimizer = optim.Adam(model.parameters(), config.lr)
+        # Feature-based bert
+        logging.info('Fine-tune simply the classifier params!')
+        optimizer = optim.Adam(list(model.model.classifier.parameters()), config.classifier_lr)
 
     f1 = -1000
 
@@ -87,7 +93,7 @@ def train(config, model):
                                                                                  metrics['precision'],
                                                                                  metrics['recall'],
                                                                                  metrics['f1']))
-            if epoch > 10 and (abs(metrics['f1'] - f1) < config.f1_conv or metrics['f1'] < f1):
+            if epoch > 2000 and (abs(metrics['f1'] - f1) < config.f1_conv or metrics['f1'] < f1):
                 break
             if metrics['f1'] > f1:
                 f1 = metrics['f1']

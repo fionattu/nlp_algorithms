@@ -166,7 +166,7 @@ def train(config):
             entities, new_valid_f1, prec, recall = get_f1(model, config, test=False)
             print('[Validation]f1 score from {:.6f} to {:.6f}'.format(valid_f1, new_valid_f1))
             print('[Validation]precision: {}, recall: {}\n'.format(prec, recall))
-            if epoch > 3000 and (abs(new_valid_f1 - valid_f1) < 0.001 or new_valid_f1 < valid_f1):
+            if epoch > 100000 and (abs(new_valid_f1 - valid_f1) < 0.001 or new_valid_f1 < valid_f1):
                 stop = True
             if new_valid_f1 > valid_f1:
                 valid_f1 = new_valid_f1

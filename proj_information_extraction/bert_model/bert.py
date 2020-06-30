@@ -19,14 +19,15 @@ class Config(object):
         self.valid = ['../data/MSRA/valid_inputs.txt', '../data/MSRA/valid_labels.txt']
         self.use_gpu = 1
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.fine_tune = True
-        self.n_epochs = 20
+        self.fine_tune = False
+        self.n_epochs = 2000
         self.hidden_dim = 768
         self.max_len = 150
-        self.lr = 0.001
+        self.bert_lr = 1e-5
+        self.classifier_lr = 1e-3
         self.batch_size = 32
         self.num_workers = 4
-        self.eval_freq = 1
+        self.eval_freq = 2
         self.f1_conv = 0.01
         self.tag2id = {'': 0,
                        'B_ns': 1,
@@ -60,7 +61,10 @@ class Bert(nn.Module):
         # https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-chinese-pytorch_model.bin
         # https://s3.amazonaws.com/models.huggingface.co/bert/bert-base-chinese-config.json
         self.model = BertForTokenClassification.from_pretrained(config.chinese_bert_path, num_labels=config.n_tags)
-        self.model.to(config.device)
+
+        if not config.fine_tune:
+            for param in self.model.bert.parameters():
+                param.requires_grad = False
 
     def forward(self, input_ids, tag_ids, att_masks):
         loss, outputs = self.model(input_ids, attention_mask=att_masks, labels=tag_ids)
