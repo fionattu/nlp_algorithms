@@ -49,6 +49,8 @@ softmax方法针对每一个训练语料都要进行一次分母计算 $\sum_{w=
 
 Tomas Mikolov为代表的google学者们继而提出第二篇论文：Distributed Representations of Words and Phrases and their Compositionality，用来加速训练过程。其中主要涉及三个tricks。
 
+Skipgram和CBOW在Hierachical Softmax和Negative Sampling的目标函数和梯度下降推导见<a href="https://github.com/fionattu/nlp_algorithms/blob/master/pics/derivation/ns_hs.pdf" target="_blank" rel="noopener">该链接</a>。
+
 ### Hierachical Softmax (层次softmax)
 用哈夫曼树(二叉树)取代softmax层。哈夫曼树的叶子节点为$V$个词汇，在文本中频率越高的单词离根节点越近。而非叶子节点均用向量表示，是这个模型需要进行学习的参数。
 	
