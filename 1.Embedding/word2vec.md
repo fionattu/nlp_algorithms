@@ -43,13 +43,13 @@ word2vec属于自编码无监督学习，语料完全来自于文本，不需要
 
 **CBOW是用周围词去预测中心词，每个滑动窗口只进行一次前向和反向传播，输入是K个词向量的平均，输出是中心词的预测结果，时间为O(|V|), 比skip-gram更省时。但每次训练因为隐藏层的平均系数，梯度也会分散到各个周围词的词向量，没有专门针对该词的调整，可能导致效果不佳；另外虽然词语也出现在多个滑动窗口(包含前后各N-1长的词，总跨度为2N-2个词，而skip-gram为N)，但跨度太长，可能把一些上下文无关的词语放在一起训练，反而导致效果不好**。
 
-## Word2Vec Tricks
+## Word2Vec Optimization Tricks
 
 softmax方法针对每一个训练语料都要进行一次分母计算 $\sum_{w=1}^{V} exp(u_wv_c)$。而语料中的$V$单位为millions，导致计算相当耗时。
 
 Tomas Mikolov为代表的google学者们继而提出第二篇论文：Distributed Representations of Words and Phrases and their Compositionality，用来加速训练过程。其中主要涉及三个tricks。
 
-Skipgram和CBOW在Hierachical Softmax和Negative Sampling的目标函数和梯度下降推导见<a href="https://github.com/fionattu/nlp_algorithms/blob/master/pics/derivation/ns_hs.pdf" target="_blank" rel="noopener">该链接</a>。
+Skipgram和CBOW在Hierachical Softmax和Negative Sampling的目标函数和梯度下降推导见[该链接](https://github.com/fionattu/nlp_algorithms/blob/master/pics/derivation/hs_ns.pdf)。
 
 ### Hierachical Softmax (层次softmax)
 用哈夫曼树(二叉树)取代softmax层。哈夫曼树的叶子节点为$V$个词汇，在文本中频率越高的单词离根节点越近。而非叶子节点均用向量表示，是这个模型需要进行学习的参数。
