@@ -106,6 +106,8 @@ ELMo预训练模型的加入提升了所有nlp下游任务的性能，超越了�
 
 * [第一作者用Jupyter一步步实现Transformer](http://nlp.seas.harvard.edu/2018/04/03/attention.html)
 
+* [10分钟带你深入理解Transformer原理及实现](https://zhuanlan.zhihu.com/p/80986272) 
+
 * [外国博主Jay Alammar对前沿nlp模型ELMo/transformer/bert的详解](http://jalammar.github.io)
 
 ### Architecture
@@ -183,6 +185,8 @@ Multi-head Attention整个过程可以用下图表示，注意最终的z和x的�
 
 其中，i是位置向量的index, pos是词语在句子中的index。文中指出，这种编码方式有利于体现不同词语的相对位置。如[参考资料](https://datascience.stackexchange.com/questions/51065/what-is-the-positional-encoding-in-the-transformer-model)指出，我们比较不同词语的同个i，其实是三角函数的平移(相位差)，也就是文中指出的，pos+k的encoding可以表示成pos的线性组合：例如sin(pos+k) = sin(pos)cosk + cos(pos)sink。
 
+在实验结果中，作者指出把固定的正弦位置编码改成让模型自己学习的位置编码，发现实验结果和base模型差不多。
+
 ### Decoder: Encoder-Decoder Attention
 
 正如以上所提的，decoder和encoder一样，但是多加了一层Encoder-Decoder Attention，来选择encoder不同输出的权重。注意在这个模块中，key和value vectors是由最后一层encoder的输出计算出来的，而query vectors是由decoder每一层的self-attention的输出提供的：
@@ -191,7 +195,7 @@ Multi-head Attention整个过程可以用下图表示，注意最终的z和x的�
 
 ### 一些还要注意的细节：
 
-**ffnn**：每个encoder/decoder的不同输入共享参数，但不同的encoder/decoder参数独立。
+**ffnn**：transformer的ffnn做了两次线性变换(输入输出dim=512)，相当一个具备单隐层的全连接网络 (激活函数为ReLU, hidden_dim=2048)。注意在同个encoder/decoder layer中，**ffnn对于每个输入是独立的并共享参数，但不同的encoder/decoder layer参数互相独立**。
 
 **Layernorm的作用**: [batchnorm](https://arxiv.org/pdf/1502.03167.pdf)是最初提出来的对神经元输入进行规范化的方法, 后续提出的laynorm, groupnorm, instancenorm都是batchnorm的改良版本。
 
