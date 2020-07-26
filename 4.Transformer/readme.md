@@ -11,7 +11,7 @@ Mark notes related to:
 
 ### Motivation
 
-Subword model是一种介于word-level和character-level的方法。首先word-level模型不能处理**未登录词(OOV, Out-Of-Vocabulary)**，即训练集不存在但是验证集或者测试集存在的单词; 而char-level模型虽然能解决OOV问题，但它会使序列变长，在rnn模型中性能会受影响，最后输出从char到word的处理也耗费时间和影响正确性 （目前的pure char model似乎表现都不错）。
+Subword model是一种介于word-level和character-level的方法。首先word-level模型不能处理**未登录词(OOV, Out-Of-Vocabulary)**，即训练集不存在但是验证集或者测试集存在的单词; 而char-level模型虽然能解决OOV问题，但它会使序列变长，在rnn模型中性能会受影响，最后输出从char到word的处理也耗费时间和影响正确性。
 
 
 ### Two Trends
@@ -67,7 +67,7 @@ Subword model是一种介于word-level和character-level的方法。首先word-l
 
 ### Context-specific Word Embeddings
 
-迄今为止我们学习了训练word embedding的多种方法：word2vec, Glove和fasttext，它们提供了pre-trained word vectors (事先训练好的词向量)给大家直接用于nlp的不同任务训练。但是我们也发现了问题。首先，**词语是具有多义的，但pre-trained word vectors一个词只用一个向量表示**，我们想要的是更细粒度(fine-grained)的词向量；然后我们也发现，在语言模型(LM: predict next word)中，rnn在每个词的hidden state位置都能结合上下文产生这个词的encoding。那么，我们可以通过结合rnn学到**Context-specific Word Embeddings**吗？这样能提高下游nlp任务的表现吗？针对这个启发，有一系列包含pretraining思想的模型开始问世，并且在不同的nlp任务上取得突破。
+迄今为止我们学习了训练word embedding的多种方法：Word2Vec, GloVe和fastText，它们提供了pre-trained word vectors (事先训练好的词向量)给大家直接用于nlp的不同任务训练。但是我们也发现了问题。首先，**词语是具有多义的，但pre-trained word vectors一个词只用一个向量表示**，我们想要的是更细粒度(fine-grained)的词向量；然后我们也发现，在语言模型(LM: predict next word)中，rnn在每个词的hidden state位置都能结合上下文产生这个词的encoding。那么，我们可以通过结合rnn学到**Context-specific Word Embeddings**吗？这样能提高下游nlp任务的表现吗？针对这个启发，有一系列包含pretraining思想的模型开始问世，并且在不同的nlp任务上取得突破。
 
 ### ELMo：Embeddings from Language Models
 
@@ -79,7 +79,7 @@ Subword model是一种介于word-level和character-level的方法。首先word-l
 
 ![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/elmo.png)
 
-ELMo用stacked biLSTM（文中为两层）在大数据集上进行LM的无监督训练。**最初上下文无关的词向量是通过cnn对字符级进行编码得到**。然后把forward和backward同一层每个词的hidden state拼接起来变成xi，用不同权重si来对xi加权求和，最后得到一个词的ELMo表示(之所以用不同层来表示，是作者在文章中指明不同层表示的是不同特征，比如底层表示语法，顶层表示语义)。这个向量随后会放进下游的nlp任务中参与训练，而si是通过训练来获取的。**ELMo通过这种方式成功地把word embedding变成动态，LM训练好之后，输入句子可以实时得到word embedding**。
+ELMo用stacked biLSTM（文中为两层）在大数据集上进行LM的无监督训练。**最初输入的词向量是通过cnn对字符级进行编码得到**。然后把forward和backward同一层每个词的hidden state拼接起来变成xi，用不同权重si来对xi加权求和，最后得到一个词的ELMo表示(之所以用不同层来表示，是作者在文章中指明不同层表示的是不同特征，比如底层表示语法，顶层表示语义)。这个向量随后会放进下游的nlp任务中参与训练，而si是通过训练来获取的。**ELMo通过这种方式成功地把word embedding变成动态，LM训练好之后，输入句子可以实时得到word embedding**。
 
 ELMo预训练模型的加入提升了所有nlp下游任务的性能，超越了当时各个任务state-of-the-art的方法。
 
@@ -97,7 +97,7 @@ ELMo预训练模型的加入提升了所有nlp下游任务的性能，超越了�
 
 ## Transformers
 
-在Transformer问世之前，[加入attention机制的seq2seq模型 (encoder-decoder)](https://github.com/fionattu/nlp_algorithms/blob/master/3.Seq2seq_attention/seq2seq_attention.md)在各个任务上已经取得了很大的提升，但rnn模型的顺序处理无法并行化，使得它的训练过程特别耗时；LSTM等门机制也只能缓解rnn的长依赖问题。rnn的优点是能考虑上下文信息对句子进行编码，既然attention这么强大且能自己学习上下文的权重，如果再加入词语顺序（order）的信息，是否也能取代rnn呢？2017年google发表了论文“Attention is all you need”，在机器翻译上取得了很好的效果 (英德翻译中，BLEU提升2）。他们在论文中提出transformer模型，后来一举成名的BERT也是基于transformer构建的。
+在Transformer问世之前，[加入attention机制的seq2seq模型 (encoder-decoder)](https://github.com/fionattu/nlp_algorithms/blob/master/3.Seq2seq_attention/readme.md)在各个任务上已经取得了很大的提升，但rnn模型的顺序处理无法并行化，使得它的训练过程特别耗时；LSTM等门机制也只能缓解rnn的长依赖问题。rnn的优点是能考虑上下文信息对句子进行编码，既然attention这么强大且能自己学习上下文的权重，如果再加入词语顺序（order）的信息，是否也能取代rnn呢？2017年google发表了论文“Attention is all you need”，在机器翻译上取得了很好的效果 (英德翻译中，BLEU提升2）。他们在论文中提出transformer模型，后来一举成名的BERT也是基于transformer构建的。
 
 
 **References:** 
@@ -138,7 +138,7 @@ ELMo预训练模型的加入提升了所有nlp下游任务的性能，超越了�
 
 ![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/self_attention_0.png)
 
-(2) 得到qi, ki, vi后，我们就可以像在seq2seq中一样来计算attention score了。假设我们的sequence只有两个词：Thinking Machines，下图黑线条方框展示的是“Thinking”这个词的attention计算方法。我们假设我们的query是从“Thinking”发出的，所以我们用q1跟所有的keys(k1, k2)分别进行点乘(包含自己)，这样得出的score代表当我们对“Thinking”进行编码时，所有词语加在这个词上的权重。
+(2) 得到qi, ki, vi后，我们就可以像在seq2seq中一样来计算attention score了。假设我们的sequence只有两个词：Thinking Machines，下图黑线条方框展示的是“Thinking”这个词的attention计算方法。我们假设我们的query是从“Thinking”发出的，所以我们用q1跟所有的keys(k1, k2)分别进行点乘(包含自己)，这样**得出的score代表当我们对“Thinking”进行编码时，所有词语加在这个词上的权重**。
 
 (3) 接着论文对这个score进行细微的处理：除于keys的维度的平方根，可以使得梯度更平缓。最后所有分数经过softmax进行归一化得到概率。每个词的概率再和他们的vectors vi进行相乘得到weighted vectors，然后所有词语的weighted vectors加和得到“Thinking”的输出z1。这个z1经过处理后会输入transformer的ffnn模块。
 
@@ -152,7 +152,7 @@ ELMo预训练模型的加入提升了所有nlp下游任务的性能，超越了�
 文章中，作者说他们发现使用多个One-head Attention是“benefitial”的，于是他们提出Multi-head Attention的概念。Multi-head Attention具体是如何运作的呢？
 
 
-我们可以想象每个head是不受影响的，我们可以同时做多次One-head Attention，但每次我们的线性变换矩阵WQ, WK, WV都是不一样的，所以根据同一个xi我们会得到不同的query qi, key ki, value vi，如下图：
+我们可以想象每个head是不受影响的，我们可以同时做多次One-head Attention，**但每次我们的线性变换矩阵WQ, WK, WV都是不一样的**，所以根据同一个xi我们会得到不同的query qi, key ki, value vi，如下图：
 
 ![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/multihead_0.png)
 
@@ -191,7 +191,7 @@ Multi-head Attention整个过程可以用下图表示，注意最终的z和x的�
 
 ### 一些还要注意的细节：
 
-**ffnn**：每个encoder/decoder的不同timestep共享参数，但不同的encoder/decoder参数独立。
+**ffnn**：每个encoder/decoder的不同输入共享参数，但不同的encoder/decoder参数独立。
 
 **Layernorm的作用**: [batchnorm](https://arxiv.org/pdf/1502.03167.pdf)是最初提出来的对神经元输入进行规范化的方法, 后续提出的laynorm, groupnorm, instancenorm都是batchnorm的改良版本。
 
