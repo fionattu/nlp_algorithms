@@ -3,7 +3,7 @@
 Mark notes related to:
 
 * Subword Models - Wordpieces
-* Pre-trained Concepts (fine-tuning/network freezing) in LM: TagLM, Elmo, ULMfit
+* Pre-trained Concepts (fine-tuning/network freezing) with LM: TagLM, Elmo, ULMfit
 * Transformers: Attention is all you need
 * Bert
 
@@ -75,7 +75,9 @@ Subword model是一种介于word-level和character-level的方法。首先word-l
 
 ![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/taglm.png)
 
-其中word embeding和LM都是事先训练好的，然后直接放进左图的模型中进行NER任务的训练。ELMo (Deep contextualized word representations, cited by 2655 on 2020/04/15)也是基于这个思想进行进一步的改造。
+其中word embeding和LM都是事先训练好的，然后直接放进左图的模型中进行NER任务的训练。ELMo (Deep contextualized word representations, cited by 2655 on 2020/04/15)也是基于这个思想进行进一步的改造。TagLM直接用了ELMo LM最后一个hidden layer来丰富embedding表示，而ELMo是通过学习task-specific参数下
+不同hidden layers的线性加合来最终取得输入的embedding。
+
 
 ![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/elmo.png)
 
@@ -84,6 +86,15 @@ ELMo用stacked biLSTM（文中为两层）在大数据集上进行LM的无监督
 ELMo预训练模型的加入提升了所有nlp下游任务的性能，超越了当时各个任务state-of-the-art的方法。
 
 ![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/elmo_exp.png)
+
+另外讨论一下一些实验发现。
+
+下图为ELMo的表示方式，其中lamda是一个和具体下游任务有关的微调参数，如果设置比较大，假设为1，则最后得出的ELMo权重接近于每一层的平均表示；设置比较小，假设为0.001，模型则可以自己学到每一层embedding的占比权重。实验也证明使用0.001的效果较好 (在三个任务中f1提升了0.2)。
+
+![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/elmo_obj.png)
+
+文章还指出EMLo要怎么用？可以拼接word/char embedding作为下游模型的输入模块(放在inputs)，但作者也发现可以和rnn的hidden states进行拼接一起输出(放在outputs)，或者两者一起用，在某些任务上可以取得更好效果。在不同的任务中，不同的嵌入方式会发挥不同的作用，带来效果的提升。
+
 
 ### ULMfit: Universal Language Model Fine-tuning for Text Classification
 
