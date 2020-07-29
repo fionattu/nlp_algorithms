@@ -5,7 +5,7 @@ Mark notes related to:
 * Subword Models - Wordpieces
 * Pre-trained Concepts (fine-tuning/network freezing) with LM: TagLM, Elmo, ULMfit
 * Transformers: Attention is all you need
-* Bert
+* Transformer-based Pretrained Models：GPT, Bert
 
 ## Subword Models
 
@@ -63,7 +63,7 @@ Subword model是一种介于word-level和character-level的方法。首先word-l
 
 * Represent words by char-embedding
 
-## Pre-trained Models: TagLM, Elmo, ULMfit
+## Pre-trained Concepts: TagLM, Elmo, ULMfit
 
 ### Context-specific Word Embeddings
 
@@ -250,8 +250,16 @@ ln和bn的流程都是一样的 (下面用bn论文截图)。如下图：
 * Adam optimizer的设置(加入warmup)
 * Regularization: residual dropouts和label smoothing
 
+## Transformer-based Pretrained Models
 
-### GPT
+### GPT1.0
+
+首个利用transformer进行特征提取的预训练+微调模型。属于单向的自回归模型，利用12层的transformer decoder(带mask), 使得self-attention只关注上文信息。并且作者提出在四种nlp任务的适配结构：分类，文本蕴含，文本相似性，多选问题，都是基于transformer+linear的结构。
+
+实验用BPE编码处理输入，使用**包含长句的数据集**对LM进行预训练并取得较低的BLEU分数，**使LM具备捕捉长依赖的能力**(ELMo会对标点符号进行断句，故只能处理短句)。并且作者还发现, 在优化不同nlp下游任务时**同时LM进行微调**，可以**提升模型的泛化能力，也能加速收敛**。
+
+实验发现9/12的数据集达到sota (比ensemble好)，并且发现迁移的LM层数越多，效果越好，进而证明预训练模型的作用。
+
 
 ### BERT (Bidirectional Encoder Representations from Transformers)
 
