@@ -256,14 +256,19 @@ ln和bn的流程都是一样的 (下面用bn论文截图)。如下图：
 
 首个利用transformer进行特征提取的预训练+微调模型。属于单向的自回归模型，利用12层的transformer decoder(带mask), 使得self-attention只关注上文信息。并且作者提出在四种nlp任务的适配结构：分类，文本蕴含，文本相似性，多选问题，都是基于transformer+linear的结构。
 
-实验用BPE编码处理输入，使用**包含长句的数据集**对LM进行预训练并取得较低的BLEU分数，**使LM具备捕捉长依赖的能力**(ELMo会对标点符号进行断句，故只能处理短句)。并且作者还发现, 在优化不同nlp下游任务时**同时LM进行微调**，可以**提升模型的泛化能力，也能加速收敛**。
+实验用BPE编码处理输入，使用**包含长句的数据集**对LM进行预训练并取得较低的perplexity，**使LM具备捕捉长依赖的能力**(ELMo会对标点符号进行断句，故只能处理短句)。并且作者还发现, 在优化不同nlp下游任务时**同时对LM进行微调**，可以**提升模型的泛化能力，也能加速收敛**。
 
 实验发现9/12的数据集达到sota (比ensemble好)，并且发现迁移的LM层数越多，效果越好，进而证明预训练模型的作用。
 
 
 ### BERT (Bidirectional Encoder Representations from Transformers)
 
-Bert的提出使得nlp 11种任务达到突破，其结构是堆叠transformer的encoder层(不使用decoder层，从全名也可以看出)，达到抽取语言深层特征的目的，最后连接FFNN+softmax完成特定任务。Bert采用预训练+微调的思想 (pre-training and fine-tuning)，模型提供预训练参数，微调是留给使用者进行的任务。
+Bert紧接着GPT1.0提出，文中对现有的预训练模型进行分类：
+
+* **Feature-based Approach**: 类似ELMo这样的，在较大的corpus上训练LM(没有labeled data，被视为无监督学习) ，固定LM参数成为预训练模型。下游任务的输入可以先通过LM得到固定的embeddings(上下文相关)，再输入具体的任务(不会对embeddings进行调整)。
+* **Fine-tuning Approach**: 在大的corpus预训练LM后，根据下游任务调整叠加的模型参数(linear，bilstm_crf等)，并同时微调LM的参数。
+
+Bert的提出基于Fine-tuning Approach，并在实验中使得11种nlp任务达到突破，其结构是堆叠**transformer的encoder层**(不使用decoder层，从全名也可以看出)，达到抽取语言深层特征的目的，最后连接FFNN+softmax完成特定任务。Bert采用预训练+微调的思想 (pre-training and fine-tuning)，模型提供预训练参数，微调是留给使用者进行的任务。
 
 * Bert具备两种不同大小的模型 (其中L/H/A分别为num_encoder_layers/hidden_size/num_self_attention_heads)
 
@@ -276,15 +281,15 @@ Bert的提出使得nlp 11种任务达到突破，其结构是堆叠transformer�
 
 **预训练两个子任务**：
 
-* "[CLS]"和"[SEP]": bert使用"[CLS]"标识符作为每个训练样本的开始字符，使用"[SEP]"标识符来分割sentence (预训练的NSP任务，微调的QA, NLI任务等)。
+* **数据处理：使用"[CLS]"和"[SEP]"**。Bert使用**"[CLS]"**标识符 (classification token)作为每个训练样本的开始字符，这个字符对应位置的最后一层的hidden state，将作为输入的表示，服务于**文本分类任务**; 使用"[SEP]"标识符来分割sentence (预训练的NSP任务，微调的QA, NLI任务等)。
 
-* MLM (Masked Language Model): 文中指出单向LM(GPT使用的unidirectional decoder), 或者直接联合正反hidden states(elmo使用的bidirectional rnn)的方法，都不能很好地体现双向的优势。于是作者提出了MLM的方法，既可以同时训练双向的LM，又可以防止一个词看见它自己(see itself)。"自己看见自己"意思是在**多层双向**encoder中，每个词的输入包括了它自己在底层被encoding的信息。如下图，预测T2的时候，T2的第二个隐层会接受到所有Ti第一个隐层传递来的消息(例如T1)，这个消息已经包含了它自己，因为E2被编码进第一层的所有隐层。
+* **预训练任务1：MLM (Masked Language Model)**。文中指出单向LM (GPT使用的unidirectional decoder), 或者直接联合正反rnn的hidden states (elmo使用的biLM)的方法，都不能很好地体现双向的优势。于是作者提出了MLM的方法，既可以同时训练双向的LM，又可以防止一个词看见它自己(see itself)。"自己看见自己"意思是在**多层双向**encoder中，每个词的输入包括了它自己在底层被encoding的信息。如下图，预测T2的时候，T2的第二个隐层会接受到所有Ti第一个隐层传递来的消息(例如T1)，这个消息已经包含了它自己，因为E2被编码进第一层的所有隐层。
 
 ![images](https://raw.githubusercontent.com/fionattu/nlp_algorithms/master/pics/bert_seeself.png)
 
-MLM的具体方法是从输入序列中随机选取15%的单词，标记为"[MASK]"标识符(80%概率)，替换成其他随机单词(10%概率)，或者保持不变(10%概率)，然后整个样本的目标从LM替换成只预测这些被选中单词的输出 (为它自己)，这样做的目的是既可以双向编码，又可以缓解“自己看见自己”的问题，但注意实际上不是严格的LM优化目标。
+MLM的具体方法是从输入序列中随机选取15%的单词，标记为**"[MASK]"标识符** (80%概率)，替换成其他随机单词 (10%概率)，或者保持不变 (10%概率)，然后**整个样本的优化目标从LM替换成只预测这些被选中单词的输出 (为它自己)**，并最小化交叉熵。这样做的目的是既可以双向编码，又可以缓解“自己看见自己”的问题，但注意实际上不是严格的LM优化目标。
 
-* NSP (Next Sentence Prediction): 文中指出，nlp任务如QA, NLI(Natural Language Inference)需要模型理解句子之间的关系，而单纯训练LM是不能捕捉这种关系的，所以作者在预训练加入NSP任务。
+* **预训练任务2：NSP (Next Sentence Prediction)**。文中指出，nlp任务如QA, NLI(Natural Language Inference)需要模型理解句子之间的关系，而单纯训练LM是不能捕捉这种关系的，所以作者在预训练加入NSP任务。样本包括A/B这样的句子对，其中正负样本(表示B是否为A的下一个句子)各占50%。利用"[CLS]"输出进行分类。
 
 MLM和NSP训练结束后，参数作为微调下游任务的初始化参数。
 
@@ -293,11 +298,23 @@ MLM和NSP训练结束后，参数作为微调下游任务的初始化参数。
 * (token/segment/positional) Embedding的初始化
 
 
-**应用到下游任务**：
+**Bert应用到下游任务的两种方法**：
 (1) feature extraction
 (2) fine-tuning
 
-**实验效果**：
+**几点实验结果**：
+
+(1) 在GLUE上(多为分类任务)发现bert (large)在小数据上比bert (small)表现好, 但由于bert (large)在小数据上微调发挥不稳定，所以作者指出每次都随机初始化然后选出在dev数据集上最好的模型;
+
+(2) 作者比较了**把bert作为特征抽取器**以及**微调bert**两种方法, 并且在CoNLL-2003数据集上做了ner任务。其中作为特征抽取器还抽取了不同层 (embeddings, 倒数第一层，倒数第二层)以及不同层的平均 (最后四层加权和，12层的加权和，最后四层的拼接)的特征，发现这些方法都能达到90%以上的正确率；如果微调bert，更可以把正确率提高到96%以上;
+
+(3) 文中给出**微调**实验设置：finetune的**epoch一般都在3**左右，**lr设置为e-5**量级(例如2e-5), **batch_size为16或者32**。
+
+(4) 实验指出更大的模型往往能取得更好的效果，比如增大hidden_dim，加深encoder layers，增多attention heads, 特别当下游任务的训练数据集很小的时候。
+
+(5) 预训练剔除NSP会让NLI的任务正确率变低，但个人感觉效果只是略微差了1%，看不到NSP的绝对优势。
+
+
 
 ## 论文精读
 
