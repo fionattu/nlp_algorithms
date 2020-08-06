@@ -15,8 +15,8 @@
 
 注：
 
-* 相应调整lr和hidden_dim明显提升f1，随着hidden_dim的增大，f1的提升变得缓慢
-* bert_bilstm_crf中，bert和bilstm_crf使用不同的学习率 (第五行)相比于使用相同的学习率 (第四行)，f1只有接近1%的提升。
-* fine-tune bert使用小的lr (1e-5)才可以获得f1的巨大提升(相比于使用1e-3的f1一直为0)
+* 相应调整lr和hidden_dim明显提升f1，随着hidden_dim的增大，f1的提升**变得缓慢**
+* bert_bilstm_crf中，bert和bilstm_crf使用不同的学习率 (第五行)相比于使用相同的学习率 (第四行)，f1只有接近1%的提升
+* **fine-tune bert使用小的lr** (1e-5)才可以获得f1的巨大提升(相比于使用1e-3的f1一直为0)
 * feature-based bert (即使用bert输出作为embedding输入下游模型)，使用稍大的lr (1e-3)可以保证较好效果，训练速度也会迅速提高
 * **fine-tune bert原模型 (第二行，外加一个Linear层+Softmax)获得最好效果，f1达95%**
