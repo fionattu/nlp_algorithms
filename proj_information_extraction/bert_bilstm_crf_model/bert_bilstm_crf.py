@@ -19,7 +19,8 @@ class Config(object):
         self.valid = ['../data/MSRA/valid_inputs.txt', '../data/MSRA/valid_labels.txt']
         self.use_gpu = 1
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.fine_tune = False
+        self.fine_tune = True
+        self.use_diff_lr = True
         self.n_epochs = 2000
         self.embedding_dim = 768
         self.hidden_dim = 500

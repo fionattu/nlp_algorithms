@@ -59,7 +59,11 @@ def train(config, model):
     if config.fine_tune:
         # Fine-tune bert
         logging.info('Fine-tune bert and bilstm-crf params!')
-        optimizer = optim.Adam(model.parameters(), config.bert_lr)
+        if not config.use_diff_lr:
+            optimizer = optim.Adam(model.parameters(), config.bert_lr)
+        else:
+            optimizer = optim.Adam([{"params": list(model.bilstm_crf.parameters()), 'lr': config.bilstm_crf_lr},
+                                    {"params": list(model.bert.parameters()), 'lr': config.bert_lr}])
     else:
         # Feature-based bert
         logging.info('Fine-tune simply the bilstm-crf params!')
