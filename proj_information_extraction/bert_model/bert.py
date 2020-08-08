@@ -13,19 +13,22 @@ logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 
 class Config(object):
     def __init__(self):
+        self.inference = True
+        self.fine_tune = True
+        self.use_gpu = 1
+        self.n_epochs = 12
         self.chinese_bert_path = "../pretrained_models/chinese_L-12_H-768_A-12/"
         self.tokenizer = BertTokenizer.from_pretrained(self.chinese_bert_path)
         self.train = ['../data/MSRA/train_inputs.txt', '../data/MSRA/train_labels.txt']
         self.valid = ['../data/MSRA/valid_inputs.txt', '../data/MSRA/valid_labels.txt']
-        self.use_gpu = 1
+        self.infer = ['../data/MSRA/test_inputs.txt', '../data/MSRA/test_labels.txt']
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.fine_tune = False
-        self.n_epochs = 2000
         self.hidden_dim = 768
         self.max_len = 150
         self.bert_lr = 1e-5
         self.classifier_lr = 1e-3
         self.batch_size = 32
+        self.batch_size_infer = 32
         self.num_workers = 4
         self.eval_freq = 2
         self.f1_conv = 0.01
