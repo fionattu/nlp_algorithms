@@ -27,15 +27,11 @@ def set_seed():
 
 def evaluate(config, model):
     if config.inference:
-        checkpoint = torch.load(config.model_save_path)
-        model.load_state_dict(checkpoint)
         valid_iter = DataLoader(BertDataset(config, config.infer),
                                 batch_size=config.batch_size_infer,
                                 shuffle=False,
                                 num_workers=config.num_workers)
     else:
-        # checkpoint = torch.load(config.model_save_path)
-        # model.load_state_dict(checkpoint)
         valid_iter = DataLoader(BertDataset(config, config.valid),
                                 batch_size=config.batch_size,
                                 shuffle=False,
@@ -92,10 +88,16 @@ def train(config, model):
     for epoch in range(config.n_epochs):
         model.train()
         logging.info('Epoch [{}/{}] starts'.format(epoch + 1, config.n_epochs))
-        train_iter = DataLoader(BertDataset(config, config.train),
-                                batch_size=config.batch_size,
-                                shuffle=False,
-                                num_workers=config.num_workers)
+        if not config.resume_train:
+            train_iter = DataLoader(BertDataset(config, config.train),
+                                    batch_size=config.batch_size,
+                                    shuffle=False,
+                                    num_workers=config.num_workers)
+        else:
+            train_iter = DataLoader(BertDataset(config, config.resume),
+                                    batch_size=config.batch_size,
+                                    shuffle=False,
+                                    num_workers=config.num_workers)
 
         for input_ids, tag_ids, att_masks in train_iter:
 
@@ -138,6 +140,10 @@ if __name__ == '__main__':
     set_seed()
     config = Config()
     model = Bert(config)
+
+    if config.inference or config.resume_train:
+        checkpoint = torch.load(config.model_save_base)
+        model.load_state_dict(checkpoint)
 
     if config.inference:
         inference(config, model)

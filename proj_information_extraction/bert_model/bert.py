@@ -15,11 +15,15 @@ class Config(object):
     def __init__(self):
         self.inference = True
         self.fine_tune = True
+        self.resume_train = False
         self.use_gpu = 1
-        self.n_epochs = 12
+        self.n_epochs = 12  # 12 for fine-tune
         self.chinese_bert_path = "../pretrained_models/chinese_L-12_H-768_A-12/"
+        self.model_save_path = "../checkpoints/bert_{}.pt".format(self.n_epochs)
+        self.model_save_base = "../checkpoints/bert_joint.pt"
         self.tokenizer = BertTokenizer.from_pretrained(self.chinese_bert_path)
         self.train = ['../data/MSRA/train_inputs.txt', '../data/MSRA/train_labels.txt']
+        self.resume = ['../data/MSRA/resume_inputs.txt', '../data/MSRA/resume_labels.txt']
         self.valid = ['../data/MSRA/valid_inputs.txt', '../data/MSRA/valid_labels.txt']
         self.infer = ['../data/MSRA/test_inputs.txt', '../data/MSRA/test_labels.txt']
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -54,7 +58,7 @@ class Config(object):
                        8: 'E_nr',
                        9: 'E_ns'}
         self.n_tags = len(self.id2tag)
-        self.model_save_path = "../checkpoints/bert_{}.pt".format(self.n_epochs)
+
 
 
 class Bert(nn.Module):
