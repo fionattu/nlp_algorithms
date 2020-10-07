@@ -295,7 +295,7 @@ MLM和NSP训练结束后，参数作为微调下游任务的初始化参数。
 
 **其他要注意的细节**：
 
-* (token/segment/positional) Embedding的初始化
+* (token/segment/positional) Embedding的初始化，参考[资料](https://www.cnblogs.com/d0main/p/10447853.html)。
 
 
 **Bert应用到下游任务的两种方法**：
