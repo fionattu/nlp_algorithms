@@ -89,7 +89,7 @@ Skipgram和CBOW在Hierachical Softmax和Negative Sampling的目标函数和梯�
 
 * 比较skip-gram和CBOW的效果
 * 加了tricks的效果，以及每个trick的优缺点
-* 梯度下降原理，参考泰勒展开式，非常好的资料 https://blog.csdn.net/pengchengliu/article/details/80932232
+* 梯度下降原理，参考泰勒展开式，非常好的资料: [参考资料](https://blog.csdn.net/pengchengliu/article/details/80932232)
 * svd方法
 * LDA/LSA
 * 哈夫曼编码

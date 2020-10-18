@@ -90,7 +90,7 @@ cache = decay_rate * cache + (1 - decay_rate) * dx**2
 x += -learning_rate * dx / (np.sqrt(cache) + eps)
 ```
 
-Hinton在论文中使用decay_rate=0.9。解决了AdaGrad梯度急剧下降的问题。
+Hinton在论文中使用decay_rate=0.9。解决了AdaGrad梯度急剧下降的问题。Adagrad会累加之前所有的梯度平方，而RMSprop仅仅是计算对应的平均值，因此可缓解Adagrad算法学习率下降较快的问题。
 	
 ### Adam - RMSProp + 动量
 
@@ -104,6 +104,8 @@ x += -learning_rate * m / (np.sqrt(v) + eps)
 
 
 ## 其他
+
+* 梯度下降原理，参考泰勒展开式，非常好的资料: [参考资料](https://blog.csdn.net/pengchengliu/article/details/80932232)
 
 * L1正则化：L1 regularization, which sums over the absolute values (rather than squares) of parameter elements – however, this is less commonly applied in practice since it leads to sparsity of parameter weights.
 
